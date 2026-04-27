@@ -79,20 +79,39 @@ The system follows a simple two-route structure:
 
 ```mermaid
 flowchart LR
-    T[Teacher] --> UC1[Add Student]
-    T --> UC2[Update Student]
-    T --> UC3[Delete Student]
-    T --> UC4[View Students]
-    T --> UC5[Filter Students by Section]
-    T --> UC6[Sort Students by Student ID / Date Created]
-    T --> UC7[Generate Student QR]
-    T --> UC8[Manage Teachers]
-    T --> UC9[Manage Subjects]
+    T["Actor: Teacher"]
+    S["Actor: Student"]
 
-    S[Student] --> UC10[Select Subject]
-    S --> UC11[Scan QR Code]
-    S --> UC12[Submit Attendance with Subject]
-    UC12 --> UC13[Receive Success / Error Message]
+    subgraph SYS["Student Management System (System Boundary)"]
+        UC1([Add Student])
+        UC2([Update Student])
+        UC3([Delete Student])
+        UC4([View Students])
+        UC5([Filter Students by Section])
+        UC6([Sort Students by Student ID or Date Created])
+        UC7([Generate Student QR])
+        UC8([Manage Teachers])
+        UC9([Manage Subjects])
+        UC10([Select Subject])
+        UC11([Scan QR Code])
+        UC12([Submit Attendance with Subject])
+        UC13([Receive Success or Error Message])
+    end
+
+    T --- UC1
+    T --- UC2
+    T --- UC3
+    T --- UC4
+    T --- UC5
+    T --- UC6
+    T --- UC7
+    T --- UC8
+    T --- UC9
+
+    S --- UC10
+    S --- UC11
+    S --- UC12
+    UC12 --- UC13
 ```
 
 ---
@@ -254,6 +273,60 @@ CREATE TABLE IF NOT EXISTS attendance (
     CONSTRAINT uq_attendance_student_subject_date
         UNIQUE (student_id, subject_id, date)
 );
+```
+
+---
+
+## QR Attendance Flow Diagram (Mermaid)
+
+```mermaid
+flowchart TD
+    A[Open student page] --> B[Select subject]
+    B --> C[Scan QR]
+    C --> D[Extract student_id]
+    D --> E[POST student_id + subject_id]
+
+    E --> F{Validate fields}
+    F -- Missing --> X1[Error: Missing fields]
+    F -- OK --> G{Student exists?}
+
+    G -- No --> X2[Error: Invalid student]
+    G -- Yes --> H{Subject exists?}
+
+    H -- No --> X3[Error: Invalid subject]
+    H -- Yes --> I{Duplicate today?}
+
+    I -- Yes --> X4[Error: Already recorded]
+    I -- No --> J[Get server date/time]
+    J --> K[Compare with late cutoff]
+    K --> L{Status}
+    L -- On time --> M[Set present]
+    L -- Late --> N[Set late]
+
+    M --> O[Insert attendance]
+    N --> O
+    O --> P[Success response]
+
+    class A,B,C studentAction;
+    class D,E,J,K,M,N,O systemAction;
+    class F,G,H,I,L decision;
+    class X1,X2,X3,X4,P response;
+
+    classDef studentAction fill:#dbeafe,stroke:#1d4ed8,color:#1e3a8a,stroke-width:1px;
+    classDef systemAction fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:1px;
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f,stroke-width:1px;
+    classDef response fill:#f3e8ff,stroke:#9333ea,color:#581c87,stroke-width:1px;
+
+    subgraph LEGEND[Legend]
+        LG1[Blue: Student Action]
+        LG2[Green: System Action]
+        LG3[Yellow Diamond: Decision]
+        LG4[Purple: System Response]
+    end
+    class LG1 studentAction;
+    class LG2 systemAction;
+    class LG3 decision;
+    class LG4 response;
 ```
 
 ---
