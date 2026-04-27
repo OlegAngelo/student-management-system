@@ -173,7 +173,7 @@ erDiagram
 
 ---
 
-## 6. Wireframe / UI Prototype (Mermaid)
+## 6. Wireframe / UI Prototype
 
 ### Teacher Module Wireframe
 
