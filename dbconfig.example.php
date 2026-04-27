@@ -1,7 +1,10 @@
 <?php
 /**
- * Local database connection (ignored by git).
- * Safe default values for XAMPP local development.
+ * Copy this file to dbconfig.php and update values if needed.
+ * Example:
+ * 1) Duplicate this file as dbconfig.php
+ * 2) Keep host as localhost for XAMPP
+ * 3) Update username/password/database if your setup is different
  */
 
 $db_host = "localhost";
