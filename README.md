@@ -150,8 +150,8 @@ flowchart TB
     B --> B3[Add Student Button]
 
     A --> C[Student Table]
-    C --> C1[Columns: Student ID | Name | Year | Section | Date Created]
-    C --> C2[Row Actions: Edit | Delete | Generate QR]
+    C --> C1[Columns: Student ID, Name, Year, Section, Date Created]
+    C --> C2[Row Actions: Edit, Delete, Generate QR]
 
     A --> D[Add/Update Student Form]
     D --> D1[Student ID Input]
@@ -161,8 +161,8 @@ flowchart TB
     D --> D5[Submit Button]
 
     A --> E[Teacher and Subject Setup]
-    E --> E1[Teacher Form: Name | Subject]
-    E --> E2[Subject Form: Subject Name | Assigned Teacher]
+    E --> E1[Teacher Form: Name, Subject]
+    E --> E2[Subject Form: Subject Name, Assigned Teacher]
 ```
 
 ### Student Module Wireframe
