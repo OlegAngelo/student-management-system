@@ -310,11 +310,15 @@ Response format (JSON):
 2. Start `Apache` and `MySQL`.
 3. Place project folder in `htdocs`:
    - `C:/xampp/htdocs/student-management-system`
-4. Open phpMyAdmin and create/import the database schema from this README.
-5. Confirm database credentials in `dbconfig.php`.
-6. Access teacher module:
+4. Open phpMyAdmin and import:
+   - `database/schema.sql`
+5. Create your local DB config:
+   - Copy `dbconfig.example.php` to `dbconfig.php`
+6. Confirm database credentials in `dbconfig.php`.
+   - Default XAMPP values usually work: `localhost`, `root`, empty password
+7. Access teacher module:
    - `http://localhost/student-management-system/teacher`
-7. Access student module:
+8. Access student module:
    - `http://localhost/student-management-system/student`
 
 ---
@@ -334,7 +338,11 @@ Response format (JSON):
 │   │── index.php
 │   │── attendance.php
 │
+│── /database
+│   │── schema.sql
+│
 │── dbconfig.php
+│── dbconfig.example.php
 │── style.css
 │── script.js
 │── README.md
