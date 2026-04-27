@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS attendance (
 ```mermaid
 flowchart TD
     A[Open student page] --> B[Select subject]
-    B --> C[Scan QR]
+    B --> C[System scans QR via camera]
     C --> D[Extract student_id]
     D --> E[POST student_id + subject_id]
 
@@ -307,8 +307,8 @@ flowchart TD
     N --> O
     O --> P[Success response]
 
-    class A,B,C studentAction;
-    class D,E,J,K,M,N,O systemAction;
+    class A,B studentAction;
+    class C,D,E,J,K,M,N,O systemAction;
     class F,G,H,I,L decision;
     class X1,X2,X3,X4,P response;
 
