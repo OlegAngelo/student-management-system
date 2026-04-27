@@ -120,6 +120,8 @@ erDiagram
         INT id PK
         VARCHAR subject_name
         INT teacher_id FK
+        TIME schedule_time
+        TIME late_after_time
     }
 
     ATTENDANCE {
@@ -127,13 +129,28 @@ erDiagram
         VARCHAR student_id FK
         INT subject_id FK
         DATE date
-        TIME time
+        TIME checkin_time
+        ENUM status
     }
 
     TEACHERS ||--o{ SUBJECTS : "handles"
     STUDENTS ||--o{ ATTENDANCE : "has"
     SUBJECTS ||--o{ ATTENDANCE : "records"
 ```
+
+---
+
+### ERD Table and Field Purpose
+
+- `students`: master list of enrolled students. `student_id` is the QR value and unique student reference.
+- `teachers`: stores teacher profile information (project scope: single teacher profile can be used).
+- `subjects`: list of subjects handled by a teacher, including schedule reference:
+  - `schedule_time`: official class start time
+  - `late_after_time`: cutoff where scan status becomes `late`
+- `attendance`: daily attendance log per student per subject:
+  - `checkin_time`: actual scan/login time
+  - `status`: `present`, `late`, or `absent`
+  - unique key on `student_id + subject_id + date` prevents duplicate daily entries per subject.
 
 ---
 
@@ -210,6 +227,8 @@ CREATE TABLE IF NOT EXISTS subjects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     subject_name VARCHAR(100) NOT NULL,
     teacher_id INT NOT NULL,
+    schedule_time TIME NOT NULL,
+    late_after_time TIME NOT NULL,
     CONSTRAINT fk_subjects_teacher
         FOREIGN KEY (teacher_id) REFERENCES teachers(id)
         ON UPDATE CASCADE
@@ -222,7 +241,8 @@ CREATE TABLE IF NOT EXISTS attendance (
     student_id VARCHAR(50) NOT NULL,
     subject_id INT NOT NULL,
     date DATE NOT NULL,
-    time TIME NOT NULL,
+    checkin_time TIME NULL,
+    status ENUM('present', 'late', 'absent') NOT NULL DEFAULT 'absent',
     CONSTRAINT fk_attendance_student
         FOREIGN KEY (student_id) REFERENCES students(student_id)
         ON UPDATE CASCADE
@@ -244,7 +264,12 @@ CREATE TABLE IF NOT EXISTS attendance (
 - Reject attendance if `student_id` does not exist in `students`.
 - Reject attendance if `subject_id` does not exist in `subjects`.
 - Reject duplicate attendance for the same `student_id + subject_id + date`.
-- Save server-side current date and time when attendance is valid.
+- Save server-side current date and `checkin_time` when attendance is valid.
+- Determine status using subject schedule:
+  - `present` if scan time is on/before `late_after_time`
+  - `late` if scan time is after `late_after_time`
+- Keep `absent` as default for records that are not yet scanned.
+- To fully use default `absent`, the system should pre-create daily attendance rows per student per subject, then update them to `present/late` on scan.
 
 ---
 
@@ -323,5 +348,5 @@ Response format (JSON):
 - The project scope assumes one teacher account/profile handling multiple subjects.
 - The system is designed for beginner-friendly PHP + MySQL implementation.
 - Student QR code stores only `student_id` (no subject or personal data in QR).
-- Attendance is limited to one record per student per subject per day.
+- Attendance is limited to one record per student per subject per day with status (`present`, `late`, `absent`).
 - Built for local deployment and testing using XAMPP + phpMyAdmin.
