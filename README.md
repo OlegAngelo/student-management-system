@@ -385,40 +385,41 @@ Response format (JSON):
    - `C:/xampp/htdocs/student-management-system`
 4. Open phpMyAdmin and import:
    - `database/schema.sql`
-5. Create your local DB config:
+5. Create local DB config:
    - Copy `dbconfig.example.php` to `dbconfig.php`
 6. Confirm database credentials in `dbconfig.php`.
    - Default XAMPP values usually work: `localhost`, `root`, empty password
-7. Access teacher module:
+7. Access the app (front controller):
+   - `http://localhost/student-management-system/`
+8. Teacher module:
    - `http://localhost/student-management-system/teacher`
-8. Access student module:
+9. Student module:
    - `http://localhost/student-management-system/student`
+
+> Note: routing uses Apache rewrite rules via `.htaccess`. Ensure Apache has `mod_rewrite` enabled and `AllowOverride All` for the project directory (XAMPP default usually works).
 
 ---
 
 ## File Structure
 
+Simple MVC-style layout: one entry point, a single route file, controllers, models, and views.
+
 ```text
-/project-folder
-│── /teacher
-│   │── index.php
-│   │── insert.php
-│   │── update.php
-│   │── delete.php
-│   │── qr_generate.php
-│
-│── /student
-│   │── index.php
-│   │── attendance.php
+/student-management-system
+│── /assets            ← CSS, JS, images
+│── /controllers       ← one class per area (Home, Teacher, Student, …)
+│── /models            ← database access (one file per main table is a good start)
+│── /views             ← HTML templates (PHP files that mostly print HTML)
 │
 │── /database
-│   │── schema.sql
+│   └── schema.sql
 │
+│── routes.php         ← URL path → [Controller, method]
+│── .htaccess          ← sends requests to root index.php
+│── index.php          ← front controller: loads routes, runs the right controller
 │── dbconfig.php
 │── dbconfig.example.php
-│── style.css
-│── script.js
-│── README.md
+└── README.md
 ```
 
 ---

@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Keep existing files/folders reachable (assets, images, etc.)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Everything else goes to root index.php
+RewriteRule ^ index.php [L]
+

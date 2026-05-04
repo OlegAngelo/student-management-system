@@ -1,5 +1,4 @@
--- Student Management System
--- Import this file in phpMyAdmin to create the full schema.
+-- import file in /phpMyAdmin to create the db and tables
 
 CREATE DATABASE IF NOT EXISTS student_management_system;
 USE student_management_system;
