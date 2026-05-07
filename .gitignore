@@ -1,3 +1,9 @@
 dbconfig.php
 /.env
 /.env.*
+
+# Local/sample seed migrations (keep core schema migrations tracked)
+/migrations/add_sample_teacher_data.php
+/migrations/*_seed_*.php
+
+/migrations/*_dedupe_*.php

@@ -15,7 +15,7 @@
     <main class="shell">
         <section class="card">
             <h1 class="page-title">Student portal</h1>
-            <p class="page-intro">Example of Controller → Model → View: the list below comes from <code>Student::all()</code> (empty until SQL is added).</p>
+            <!-- <p class="page-intro">Student records will appear here once data is available.</p> -->
 
             <?php
                 /** @var list<array<string, mixed>> $students */
