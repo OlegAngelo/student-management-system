@@ -7,11 +7,6 @@
     <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl . '/assets/style.css') ?>">
 </head>
 <body>
-    <nav class="site-top" aria-label="Main">
-        <a href="<?= htmlspecialchars($baseUrl . '/') ?>">Home</a>
-        <a href="<?= htmlspecialchars($baseUrl . '/teacher') ?>">Teacher</a>
-        <a href="<?= htmlspecialchars($baseUrl . '/student') ?>" aria-current="page">Student</a>
-    </nav>
     <main class="shell">
         <section class="card">
             <h1 class="page-title">Student portal</h1>
@@ -32,7 +27,6 @@
                 </ul>
             <?php } ?>
 
-            <p class="page-actions"><a class="button secondary" href="<?= htmlspecialchars($baseUrl . '/') ?>">Back to home</a></p>
         </section>
     </main>
     <script src="<?= htmlspecialchars($baseUrl . '/assets/script.js') ?>"></script>

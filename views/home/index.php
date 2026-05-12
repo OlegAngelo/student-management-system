@@ -7,11 +7,6 @@
     <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl . '/assets/style.css') ?>">
 </head>
 <body>
-    <nav class="site-top" aria-label="Main">
-        <a href="<?= htmlspecialchars($baseUrl . '/') ?>" aria-current="page">Home</a>
-        <a href="<?= htmlspecialchars($baseUrl . '/teacher') ?>">Teacher</a>
-        <a href="<?= htmlspecialchars($baseUrl . '/student') ?>">Student</a>
-    </nav>
     <main class="shell">
         <section class="card">
             <div class="hero">
