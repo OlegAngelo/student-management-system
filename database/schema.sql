@@ -1,5 +1,4 @@
--- Student Management System
--- Import this file in phpMyAdmin to create the full schema.
+-- import file in /phpMyAdmin to create the db and tables
 
 CREATE DATABASE IF NOT EXISTS student_management_system;
 USE student_management_system;
@@ -18,7 +17,9 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS teachers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    subject VARCHAR(100) NOT NULL
+    subject VARCHAR(100) NOT NULL,
+    CONSTRAINT uq_teachers_name_subject
+        UNIQUE (name, subject)
 );
 
 -- Subjects table
@@ -28,6 +29,8 @@ CREATE TABLE IF NOT EXISTS subjects (
     teacher_id INT NOT NULL,
     schedule_time TIME NOT NULL,
     late_after_time TIME NOT NULL,
+    CONSTRAINT uq_subjects_unique
+        UNIQUE (subject_name, teacher_id, schedule_time, late_after_time),
     CONSTRAINT fk_subjects_teacher
         FOREIGN KEY (teacher_id) REFERENCES teachers(id)
         ON UPDATE CASCADE

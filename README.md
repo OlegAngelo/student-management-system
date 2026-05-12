@@ -163,9 +163,12 @@ erDiagram
 
 - `students`: master list of enrolled students. `student_id` is the QR value and unique student reference.
 - `teachers`: stores teacher profile information (project scope: single teacher profile can be used).
+- `teachers`: stores teacher profile information (project scope: single teacher profile can be used).
+  - unique key on `(name, subject)` prevents duplicate teacher+subject records.
 - `subjects`: list of subjects handled by a teacher, including schedule reference:
   - `schedule_time`: official class start time
   - `late_after_time`: cutoff where scan status becomes `late`
+  - unique key on `(subject_name, teacher_id, schedule_time, late_after_time)` prevents duplicate subject definitions.
 - `attendance`: daily attendance log per student per subject:
   - `checkin_time`: actual scan/login time
   - `status`: `present`, `late`, or `absent`
@@ -238,7 +241,9 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS teachers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    subject VARCHAR(100) NOT NULL
+    subject VARCHAR(100) NOT NULL,
+    CONSTRAINT uq_teachers_name_subject
+        UNIQUE (name, subject)
 );
 
 -- Subjects table
@@ -248,6 +253,8 @@ CREATE TABLE IF NOT EXISTS subjects (
     teacher_id INT NOT NULL,
     schedule_time TIME NOT NULL,
     late_after_time TIME NOT NULL,
+    CONSTRAINT uq_subjects_unique
+        UNIQUE (subject_name, teacher_id, schedule_time, late_after_time),
     CONSTRAINT fk_subjects_teacher
         FOREIGN KEY (teacher_id) REFERENCES teachers(id)
         ON UPDATE CASCADE
@@ -383,42 +390,101 @@ Response format (JSON):
 2. Start `Apache` and `MySQL`.
 3. Place project folder in `htdocs`:
    - `C:/xampp/htdocs/student-management-system`
-4. Open phpMyAdmin and import:
-   - `database/schema.sql`
-5. Create your local DB config:
+4. Create local DB config:
    - Copy `dbconfig.example.php` to `dbconfig.php`
-6. Confirm database credentials in `dbconfig.php`.
+5. Confirm database credentials in `dbconfig.php`.
    - Default XAMPP values usually work: `localhost`, `root`, empty password
-7. Access teacher module:
+6. Run migrations (code-first schema setup):
+   - `php migrate.php`
+7. Access the app (front controller):
+   - `http://localhost/student-management-system/`
+8. Teacher module:
    - `http://localhost/student-management-system/teacher`
-8. Access student module:
+9. Student module:
    - `http://localhost/student-management-system/student`
+
+> Note: routing uses Apache rewrite rules via `.htaccess`. Ensure Apache has `mod_rewrite` enabled and `AllowOverride All` for the project directory (XAMPP default usually works).
+
+---
+
+## 11. Simple Code-First Migrations
+
+Use this flow for DB changes:
+
+1. Create a new file in `/migrations`  
+   Example: `add_new_column_student_table.php`
+2. Add migration content in the file:
+   - simplest: return one SQL string
+   - optional: return an array of SQL strings
+   - advanced: return a callable (`function (mysqli $conn): bool { ... }`)
+3. Run:
+   - `php migrate.php`
+   - `php migrate.php --all` (run all pending in filename order)
+   - `php migrate.php --file=your_migration_file.php` (run one specific pending file)
+
+`migrate.php` default behavior runs only the latest pending migration file.
+Use `--all` to run all pending migrations in filename order.
+Executed migrations are stored in the `migrations` table, so one file runs only once.
+
+### Migration commands
+
+Run from project root (`C:/xampp/htdocs/student-management-system`):
+
+- Latest pending migration only:
+  - `php migrate.php`
+- All pending migrations in order:
+  - `php migrate.php --all`
+- Specific pending migration file:
+  - `php migrate.php --file=20260507_100003_seed_subjects.php`
+
+If `php` is not recognized in terminal, use XAMPP PHP directly:
+
+- `C:/xampp/php/php.exe migrate.php`
+- `C:/xampp/php/php.exe migrate.php --all`
+- `C:/xampp/php/php.exe migrate.php --file=20260507_100003_seed_subjects.php`
+
+### FK-safe insert order (hierarchy)
+
+Use this order when adding seed/sample data:
+
+1. `teachers` (no FK dependency)
+2. `students` (no FK dependency)
+3. `subjects` (depends on `teachers.id`)
+4. `attendance` (depends on `students.student_id` and `subjects.id`)
+
+Sample migration files added in this order:
+
+- `20260507_100001_seed_teachers.php`
+- `20260507_100002_seed_students.php`
+- `20260507_100003_seed_subjects.php`
+- `20260507_100004_seed_attendance.php`
+- For existing duplicate data cleanup, run:
+  - `20260507_100005_dedupe_teachers_subjects.php`
 
 ---
 
 ## File Structure
 
+Simple MVC-style layout: one entry point, a single route file, controllers, models, and views.
+
 ```text
-/project-folder
-│── /teacher
-│   │── index.php
-│   │── insert.php
-│   │── update.php
-│   │── delete.php
-│   │── qr_generate.php
-│
-│── /student
-│   │── index.php
-│   │── attendance.php
+/student-management-system
+│── /assets            ← CSS, JS, images
+│── /controllers       ← one class per area (Home, Teacher, Student, …)
+│── /models            ← database access (one file per main table is a good start)
+│── /views             ← HTML templates (PHP files that mostly print HTML)
 │
 │── /database
-│   │── schema.sql
+│   └── schema.sql
+│── /migrations        ← migration files run by migrate.php
 │
+│── migrate.php        ← migration runner (php migrate.php)
+│── routes.php         ← URL path → [Controller, method]
+│── .htaccess          ← sends requests to root index.php
+│── index.php          ← front controller: loads routes, runs the right controller
 │── dbconfig.php
 │── dbconfig.example.php
-│── style.css
-│── script.js
-│── README.md
+└── README.md
 ```
 
 ---
