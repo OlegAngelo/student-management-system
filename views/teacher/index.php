@@ -32,7 +32,7 @@
 
                         <!-- name -->
                         <label for="name">Name</label>
-                        <input type="text" id="name" name="name" placeholder="John Doe">
+                        <input type="text" id="name" name="name" placeholder="John Doe" autocomplete="off">
 
                         <!-- year -->
                         <label for="year">Batch Year</label>
@@ -81,6 +81,9 @@
                                         <button type="button" class="subject-icon-btn" aria-label="Delete student 2024100001">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                                         </button>
+                                        <button type="button" class="subject-icon-btn student-qr-open-btn" aria-label="Show QR code for student 2024100001" data-student-id="2024100001" data-student-name="Juan Dela Cruz">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -96,6 +99,9 @@
                                         </button>
                                         <button type="button" class="subject-icon-btn" aria-label="Delete student 2024100002">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                        </button>
+                                        <button type="button" class="subject-icon-btn student-qr-open-btn" aria-label="Show QR code for student 2024100002" data-student-id="2024100002" data-student-name="Maria Santos">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>
                                         </button>
                                     </div>
                                 </td>
@@ -196,6 +202,26 @@
             </section>
         </div>
     </main>
+
+    <div id="student-qr-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="student-qr-modal-title">
+        <button type="button" class="modal__backdrop" id="student-qr-modal-backdrop" tabindex="-1" aria-label="Close dialog"></button>
+        <div class="modal__panel modal-qr-panel">
+            <h2 id="student-qr-modal-title" class="modal-qr-panel__title">QR Code for</h2>
+            <div class="modal-qr-panel__figure">
+                <img
+                    id="student-qr-modal-img"
+                    class="modal-qr-panel__qr-img"
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&amp;margin=8&amp;data=student-management%3Apreview"
+                    width="280"
+                    height="280"
+                    alt=""
+                    decoding="async"
+                    referrerpolicy="no-referrer-when-downgrade"
+                >
+            </div>
+            <button type="button" class="modal-qr-panel__close" id="student-qr-modal-close">Close</button>
+        </div>
+    </div>
 
     <script src="<?= htmlspecialchars($baseUrl . '/assets/script.js') ?>"></script>
 </body>
