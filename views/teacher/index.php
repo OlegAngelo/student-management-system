@@ -164,9 +164,15 @@
                     </form>
                 </div>
 
+                <div class="subject-schedule-toolbar" id="subject-schedule-toolbar">
+                    <label for="subject-list-search" class="visually-hidden">Search subjects by name</label>
+                    <input type="search" id="subject-list-search" class="subject-schedule-toolbar__input"
+                        placeholder="Search by subject name…" autocomplete="off">
+                </div>
+
                 <!-- subject & schedule list (static sample data) -->
-                <div class="subject-schedule-list" role="list">
-                    <article class="subject-schedule-card" role="listitem">
+                <div class="subject-schedule-list" id="subject-schedule-list" role="list">
+                    <article class="subject-schedule-card" role="listitem" data-subject-name="Mathematics">
                         <div class="subject-schedule-card__top">
                             <h3 class="subject-schedule-card__title">Mathematics</h3>
                             <div class="subject-schedule-card__actions">
@@ -184,7 +190,7 @@
                         </div>
                     </article>
 
-                    <article class="subject-schedule-card" role="listitem">
+                    <article class="subject-schedule-card" role="listitem" data-subject-name="Physics">
                         <div class="subject-schedule-card__top">
                             <h3 class="subject-schedule-card__title">Physics</h3>
                             <div class="subject-schedule-card__actions">
@@ -202,7 +208,7 @@
                         </div>
                     </article>
 
-                    <article class="subject-schedule-card" role="listitem">
+                    <article class="subject-schedule-card" role="listitem" data-subject-name="Chemistry">
                         <div class="subject-schedule-card__top">
                             <h3 class="subject-schedule-card__title">Chemistry</h3>
                             <div class="subject-schedule-card__actions">

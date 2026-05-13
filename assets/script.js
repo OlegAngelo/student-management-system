@@ -129,6 +129,30 @@
         applyFilter();
     }
 
+    function initSubjectScheduleSearch() {
+        var root = document.getElementById('subject-schedule-list');
+        var searchEl = document.getElementById('subject-list-search');
+        if (!root || !searchEl) {
+            return;
+        }
+
+        function applySubjectFilter() {
+            var q = (searchEl.value || '').trim().toLowerCase();
+            var cards = root.querySelectorAll('.subject-schedule-card[data-subject-name]');
+            cards.forEach(function (card) {
+                var name = (card.getAttribute('data-subject-name') || '').toLowerCase();
+                if (!q) {
+                    card.style.display = '';
+                    return;
+                }
+                card.style.display = name.indexOf(q) !== -1 ? '' : 'none';
+            });
+        }
+
+        searchEl.addEventListener('input', applySubjectFilter);
+        applySubjectFilter();
+    }
+
     function initStudentQrModal() {
         var modal = document.getElementById('student-qr-modal');
         if (!modal) {
@@ -221,6 +245,7 @@
         }
 
         initStudentListToolbar();
+        initSubjectScheduleSearch();
         initStudentQrModal();
     });
 })();
