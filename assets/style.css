@@ -194,6 +194,8 @@ a {
 }
 
 .button.secondary:hover {
+    background: #f0efef;
+    border-color: #d3cccc;
     cursor: pointer;
 }
 
@@ -246,12 +248,16 @@ select {
 }
 
 .add-student-form-container {
-    border: 1px solid #ddd;
+    border: 1px solid #cfd8e3;
     border-radius: 10px;
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    box-shadow:
+        0 2px 4px rgba(11, 87, 208, 0.06),
+        0 10px 28px rgba(11, 87, 208, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.6) inset;
 }
 
 /* Author `display: flex` above can override the UA [hidden] rule; keep panel off-screen until toggled. */
@@ -260,13 +266,17 @@ select {
 }
 
 .add-subject-form-container {
-    border: 1px solid #ddd;
+    border: 1px solid #d5dae0;
     border-radius: 10px;
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 8px;
     margin-top: 16px;
+    box-shadow:
+        0 2px 4px rgba(15, 23, 42, 0.05),
+        0 10px 28px rgba(15, 23, 42, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.6) inset;
 }
 
 .add-subject-form-container[hidden] {
