@@ -7,3 +7,4 @@ dbconfig.php
 /migrations/*_seed_*.php
 
 /migrations/*_dedupe_*.php
+/migrations/*_delete*.php

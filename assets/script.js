@@ -153,6 +153,28 @@
         applySubjectFilter();
     }
 
+    function initAttendanceScanner() {
+        var select = document.getElementById('subject_id');
+        var placeholder = document.getElementById('attendance-placeholder');
+        var scanner = document.getElementById('attendance-scanner');
+        if (!select || !placeholder || !scanner) {
+            return;
+        }
+
+        function update() {
+            if (select.value) {
+                placeholder.setAttribute('hidden', '');
+                scanner.removeAttribute('hidden');
+            } else {
+                scanner.setAttribute('hidden', '');
+                placeholder.removeAttribute('hidden');
+            }
+        }
+
+        select.addEventListener('change', update);
+        update();
+    }
+
     function initStudentQrModal() {
         var modal = document.getElementById('student-qr-modal');
         if (!modal) {
@@ -247,5 +269,6 @@
         initStudentListToolbar();
         initSubjectScheduleSearch();
         initStudentQrModal();
+        initAttendanceScanner();
     });
 })();

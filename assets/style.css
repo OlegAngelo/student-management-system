@@ -595,3 +595,58 @@ select {
     outline: 2px solid #2f8cff;
     outline-offset: 2px;
 }
+
+/* student attendance form */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-group select {
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+/* QR attendance: empty + scanner states */
+.qr-attendance-area {
+    margin-top: 20px;
+    padding: 48px 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fafbfc;
+    color: #6b7280;
+    font-size: 15px;
+    font-weight: 400;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-attendance-area p {
+    margin: 0;
+}
+
+.qr-attendance-area--empty {
+    min-height: 180px;
+}
+
+.qr-attendance-area--scanner {
+    min-height: 220px;
+    margin-top: 12px;
+}
+
+.qr-attendance-area[hidden] {
+    display: none !important;
+}
+
+.qr-attendance-scanner {
+    margin-top: 20px;
+}
+
+.qr-attendance-scanner[hidden] {
+    display: none !important;
+}
