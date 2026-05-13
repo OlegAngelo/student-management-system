@@ -49,6 +49,86 @@
         }
     }
 
+    function initStudentListToolbar() {
+        var listRoot = document.getElementById('student-list');
+        var searchEl = document.getElementById('student-list-search');
+        var sortEl = document.getElementById('student-list-sort');
+        if (!listRoot || !searchEl || !sortEl) {
+            return;
+        }
+
+        var tbody = listRoot.querySelector('tbody');
+        if (!tbody) {
+            return;
+        }
+
+        function getDataRows() {
+            return [].slice.call(tbody.querySelectorAll('tr[data-student-id]'));
+        }
+
+        function rowHaystack(row) {
+            var id = (row.getAttribute('data-student-id') || '').toLowerCase();
+            var name = (row.getAttribute('data-name') || '').toLowerCase();
+            var year = (row.getAttribute('data-year') || '').toLowerCase();
+            var section = (row.getAttribute('data-section') || '').toLowerCase();
+            return id + ' ' + name + ' ' + year + ' ' + section;
+        }
+
+        function applyFilter() {
+            var q = (searchEl.value || '').trim().toLowerCase();
+            getDataRows().forEach(function (row) {
+                if (!q) {
+                    row.style.display = '';
+                    return;
+                }
+                row.style.display = rowHaystack(row).indexOf(q) !== -1 ? '' : 'none';
+            });
+        }
+
+        function sortValue(row, key) {
+            if (key === 'id') {
+                return row.getAttribute('data-student-id') || '';
+            }
+            return row.getAttribute('data-' + key) || '';
+        }
+
+        function compareRows(mode, a, b) {
+            var lastDash = mode.lastIndexOf('-');
+            var key = mode.slice(0, lastDash);
+            var desc = mode.slice(lastDash + 1) === 'desc';
+            var va = sortValue(a, key);
+            var vb = sortValue(b, key);
+            var n;
+            if (key === 'year') {
+                n = (parseInt(va, 10) || 0) - (parseInt(vb, 10) || 0);
+            } else if (key === 'id') {
+                n = va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' });
+            } else {
+                n = va.localeCompare(vb, undefined, { sensitivity: 'base' });
+            }
+            if (desc) {
+                n = -n;
+            }
+            return n;
+        }
+
+        function applySort() {
+            var mode = sortEl.value || 'name-asc';
+            var rows = getDataRows();
+            rows.sort(function (a, b) {
+                return compareRows(mode, a, b);
+            });
+            rows.forEach(function (row) {
+                tbody.appendChild(row);
+            });
+            applyFilter();
+        }
+
+        searchEl.addEventListener('input', applyFilter);
+        sortEl.addEventListener('change', applySort);
+        applyFilter();
+    }
+
     function initStudentQrModal() {
         var modal = document.getElementById('student-qr-modal');
         if (!modal) {
@@ -140,6 +220,7 @@
             subjectCancel.addEventListener('click', hideAddSubjectForm);
         }
 
+        initStudentListToolbar();
         initStudentQrModal();
     });
 })();

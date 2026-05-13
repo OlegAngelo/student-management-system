@@ -55,6 +55,27 @@
                     </form>
                 </div>
 
+                <div class="student-list-toolbar" id="student-list-toolbar">
+                    <div class="student-list-toolbar__search">
+                        <label for="student-list-search" class="visually-hidden">Search students</label>
+                        <input type="search" id="student-list-search" class="student-list-toolbar__input"
+                            placeholder="Search by ID, name, year, or section…" autocomplete="off">
+                    </div>
+                    <div class="student-list-toolbar__sort">
+                        <label for="student-list-sort">Sort by</label>
+                        <select id="student-list-sort" class="student-list-toolbar__select">
+                            <option value="name-asc">Name (A–Z)</option>
+                            <option value="name-desc">Name (Z–A)</option>
+                            <option value="id-asc">Student ID (ascending)</option>
+                            <option value="id-desc">Student ID (descending)</option>
+                            <option value="year-asc">Year (oldest first)</option>
+                            <option value="year-desc">Year (newest first)</option>
+                            <option value="section-asc">Section (A–Z)</option>
+                            <option value="section-desc">Section (Z–A)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <!-- student list -->
                  <div id="student-list">
                     <table class="student-list-table">
@@ -68,7 +89,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            <tr data-student-id="2024100001" data-name="Juan Dela Cruz" data-year="2024" data-section="A">
                                 <td>2024100001</td>
                                 <td>Juan Dela Cruz</td>
                                 <td>2024</td>
@@ -87,7 +108,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            <tr>
+                            <tr data-student-id="2024100002" data-name="Maria Santos" data-year="2024" data-section="B">
                                 <td>2024100002</td>
                                 <td>Maria Santos</td>
                                 <td>2024</td>
