@@ -1,23 +1,14 @@
 <?php
     declare(strict_types=1);
 
-/**
- * Attendance model for table: attendance
- *
- * Fields:
- * - id
- * - student_id
- * - subject_id
- * - date
- * - checkin_time
- * - status (present, late, absent)
- */
     class Attendance
     {
         private mysqli $conn;
 
         /**
-         * Loads DB connection from dbconfig.php.
+         * Loads the shared mysqli connection from dbconfig.php.
+         *
+         * @return void
          */
         public function __construct()
         {
@@ -27,8 +18,6 @@
         }
 
         /**
-         * all
-         * Returns: list<array<string, mixed>>
          * Gets all attendance rows ordered by latest date and id.
          *
          * @return list<array<string, mixed>>
@@ -49,9 +38,12 @@
         }
 
         /**
-         * findByKey
-         * Returns: array<string, mixed>|null
-         * Gets one attendance row using student_id + subject_id + date.
+         * Gets one attendance row by student_id, subject_id, and date.
+         *
+         * @param string $studentId
+         * @param int $subjectId
+         * @param string $date
+         * @return array<string, mixed>|null
          */
         public function findByKey(string $studentId, int $subjectId, string $date): ?array
         {
@@ -74,9 +66,14 @@
         }
 
         /**
-         * create
-         * Returns: bool
          * Inserts a new attendance row.
+         *
+         * @param string $studentId
+         * @param int $subjectId
+         * @param string $date
+         * @param string|null $checkinTime
+         * @param string $status
+         * @return bool
          */
         public function create(string $studentId, int $subjectId, string $date, ?string $checkinTime, string $status): bool
         {
@@ -95,9 +92,12 @@
         }
 
         /**
-         * updateStatusById
-         * Returns: bool
          * Updates status and check-in time by attendance id.
+         *
+         * @param int $id
+         * @param string $status
+         * @param string|null $checkinTime
+         * @return bool
          */
         public function updateStatusById(int $id, string $status, ?string $checkinTime): bool
         {
@@ -115,9 +115,10 @@
         }
 
         /**
-         * deleteById
-         * Returns: bool
          * Deletes an attendance row by id.
+         *
+         * @param int $id
+         * @return bool
          */
         public function deleteById(int $id): bool
         {

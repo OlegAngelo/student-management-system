@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>404 - Not Found</title>
-    <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl . '/assets/style.css') ?>">
+    <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl . '/assets/css/base.css') ?>">
 </head>
 <body>
     <main class="shell">

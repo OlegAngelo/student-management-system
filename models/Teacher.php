@@ -1,22 +1,14 @@
 <?php
     declare(strict_types=1);
 
-/**
- * Teacher model for table: teachers
- *
- * Fields:
- * - id
- * - name
- * - subject
- */
     class Teacher
     {
         private mysqli $conn;
 
         /**
-         * Constructor
-         * Returns: void
-         * Loads DB connection from dbconfig.php.
+         * Loads the shared mysqli connection from dbconfig.php.
+         *
+         * @return void
          */
         public function __construct()
         {
@@ -26,8 +18,6 @@
         }
 
         /**
-         * all
-         * Returns: list<array<string, mixed>>
          * Gets all teacher rows ordered by newest first.
          *
          * @return list<array<string, mixed>>
@@ -46,9 +36,10 @@
         }
 
         /**
-         * findById
-         * Returns: array<string, mixed>|null
          * Gets one teacher row by id.
+         *
+         * @param int $id
+         * @return array<string, mixed>|null
          */
         public function findById(int $id): ?array
         {
@@ -68,9 +59,11 @@
         }
 
         /**
-         * create
-         * Returns: bool
          * Inserts a new teacher row.
+         *
+         * @param string $name
+         * @param string $subject
+         * @return bool
          */
         public function create(string $name, string $subject): bool
         {
@@ -88,9 +81,12 @@
         }
 
         /**
-         * updateById
-         * Returns: bool
          * Updates teacher name and subject by id.
+         *
+         * @param int $id
+         * @param string $name
+         * @param string $subject
+         * @return bool
          */
         public function updateById(int $id, string $name, string $subject): bool
         {
@@ -108,9 +104,10 @@
         }
 
         /**
-         * deleteById
-         * Returns: bool
          * Deletes a teacher row by id.
+         *
+         * @param int $id
+         * @return bool
          */
         public function deleteById(int $id): bool
         {

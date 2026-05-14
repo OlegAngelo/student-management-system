@@ -6,17 +6,18 @@
      *
      * Format: 'PATH' => [ControllerClass::class, 'methodName']
      *
-     * - PATH format should be: '/', '/teacher', '/student' (leading slash, no trailing slash).
+     * - PATH format should be: '/', '/teacher', '/student', '/student/subjects' (leading slash, no trailing slash).
      * - Controllers must be required in public/index.php BEFORE this file is loaded.
      *
      * To add a route:
      * 1. Add a public function to a controller.
-     * 2. Add one line here pointing to [ThatController::class, 'yourMethod'].
+     * 2. Add one line here pointing to [ControllerClassName::class, 'methodName'].
      */
 
     return [
         '/' => [HomeController::class, 'index'],
         '/teacher' => [TeacherController::class, 'index'],
         '/student' => [StudentController::class, 'index'],
+        '/student/subjects' => [StudentController::class, 'subjectsJson'],
     ];
 ?>
