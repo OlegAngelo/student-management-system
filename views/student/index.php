@@ -25,9 +25,16 @@
                             <option value="" disabled selected>No subjects found</option>
                         <?php } else { ?>
                             <option value="" disabled selected>Select Subject</option>
-                            <?php foreach ($subjects as $subject) { ?>
+                            <?php foreach ($subjects as $subject) {
+                                $teacherName = trim((string) ($subject['teacher_name'] ?? ''));
+                                $label = (string) $subject['subject_name'];
+                                if ($teacherName !== '') {
+                                    $label .= ' - ' . $teacherName;
+                                }
+                                $label .= ' - ' . (string) $subject['schedule_time'];
+                                ?>
                                 <option value="<?= htmlspecialchars((string) $subject['id']) ?>">
-                                    <?= htmlspecialchars((string) $subject['subject_name']) ?>
+                                    <?= htmlspecialchars($label) ?>
                                 </option>
                             <?php } ?>
                         <?php } ?>

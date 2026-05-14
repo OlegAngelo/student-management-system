@@ -10,6 +10,7 @@
  * - teacher_id
  * - schedule_time
  * - late_after_time
+ * - teacher_name (from teachers via teacher_id; present on all()/findById rows)
  */
     class Subject
     {
@@ -36,9 +37,11 @@
          */
         public function all(): array
         {
-            $sql = 'SELECT id, subject_name, teacher_id, schedule_time, late_after_time
-                    FROM subjects
-                    ORDER BY id DESC';
+            $sql = 'SELECT s.id, s.subject_name, s.teacher_id, s.schedule_time, s.late_after_time,
+                           t.name AS teacher_name
+                    FROM subjects s
+                    LEFT JOIN teachers t ON t.id = s.teacher_id
+                    ORDER BY s.id DESC';
             $result = $this->conn->query($sql);
             if ($result === false) {
                 return [];
@@ -56,9 +59,11 @@
          */
         public function findById(int $id): ?array
         {
-            $sql = 'SELECT id, subject_name, teacher_id, schedule_time, late_after_time
-                    FROM subjects
-                    WHERE id = ?
+            $sql = 'SELECT s.id, s.subject_name, s.teacher_id, s.schedule_time, s.late_after_time,
+                           t.name AS teacher_name
+                    FROM subjects s
+                    LEFT JOIN teachers t ON t.id = s.teacher_id
+                    WHERE s.id = ?
                     LIMIT 1';
             $stmt = $this->conn->prepare($sql);
             if ($stmt === false) {
