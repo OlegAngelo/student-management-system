@@ -1,25 +1,14 @@
 <?php
     declare(strict_types=1);
 
-/**
- * Student model for table: students
- *
- * Schema fields used here:
- * - id
- * - student_id
- * - name
- * - year
- * - section
- * - date_created
- */
     class Student
     {
         private mysqli $conn;
 
         /**
-         * Constructor
-         * Returns: void
-         * Loads DB connection from dbconfig.php.
+         * Loads the shared mysqli connection from dbconfig.php.
+         *
+         * @return void
          */
         public function __construct()
         {
@@ -31,8 +20,6 @@
         }
 
         /**
-         * all
-         * Returns: list<array<string, mixed>>
          * Gets all student rows ordered by newest first.
          *
          * @return list<array<string, mixed>>
@@ -53,9 +40,10 @@
         }
 
         /**
-         * findByStudentId
-         * Returns: array<string, mixed>|null
          * Gets one student row by student_id.
+         *
+         * @param string $studentId
+         * @return array<string, mixed>|null
          */
         public function findByStudentId(string $studentId): ?array
         {
@@ -78,9 +66,13 @@
         }
 
         /**
-         * create
-         * Returns: bool
          * Inserts a new student row.
+         *
+         * @param string $studentId
+         * @param string $name
+         * @param string $year
+         * @param string $section
+         * @return bool
          */
         public function create(string $studentId, string $name, string $year, string $section): bool
         {
@@ -99,9 +91,13 @@
         }
 
         /**
-         * updateByStudentId
-         * Returns: bool
-         * Updates name/year/section using student_id.
+         * Updates name, year, and section using student_id.
+         *
+         * @param string $studentId
+         * @param string $name
+         * @param string $year
+         * @param string $section
+         * @return bool
          */
         public function updateByStudentId(string $studentId, string $name, string $year, string $section): bool
         {
@@ -121,9 +117,10 @@
         }
 
         /**
-         * deleteByStudentId
-         * Returns: bool
          * Deletes a student row by student_id.
+         *
+         * @param string $studentId
+         * @return bool
          */
         public function deleteByStudentId(string $studentId): bool
         {
