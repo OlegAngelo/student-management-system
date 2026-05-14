@@ -17,6 +17,9 @@
     return [
         '/' => [HomeController::class, 'index'],
         '/teacher' => [TeacherController::class, 'index'],
+        'GET:/teacher/api/students' => [TeacherController::class, 'studentsJson'],
+        'POST:/teacher/api/students' => [TeacherController::class, 'createStudent'],
+        'GET:/teacher/api/subjects' => [TeacherController::class, 'subjectsJson'],
         '/student' => [StudentController::class, 'index'],
         '/student/subjects' => [StudentController::class, 'subjectsJson'],
     ];

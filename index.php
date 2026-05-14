@@ -21,11 +21,6 @@
     $routes = require ROOT . '/routes.php';
 
     $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
-    if ($method !== 'GET') {
-        http_response_code(405);
-        echo 'Method Not Allowed';
-        exit;
-    }
 
     // Normalize request path: /, /teacher, /student
     $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
@@ -40,7 +35,9 @@
         $path = '/';
     }
 
-    $handler = $routes[$path] ?? null;
+    // Try method-specific route first (e.g., 'POST:/teacher/api/students'), then fallback to path-only
+    $methodPath = $method . ':' . $path;
+    $handler = $routes[$methodPath] ?? $routes[$path] ?? null;
 
     if ($handler === null) {
         http_response_code(404);
