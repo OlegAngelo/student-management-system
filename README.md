@@ -68,10 +68,13 @@ The system follows a simple two-route structure:
    - Stores attendance logs in `attendance`.
    - Enforces data consistency using unique/foreign key constraints.
 
-4. **Shared Resources**
+4. **Shared resources**
    - `dbconfig.php` for database connection
-   - `style.css` for common styling
-   - `script.js` for frontend behavior
+   - `assets/css/base.css` for layout, cards, buttons, and home tiles
+   - `assets/css/teacher.css` for the teacher dashboard (lists, subject cards, QR modal)
+   - `assets/css/student.css` for the student portal (subject picker, QR attendance areas)
+   - `assets/js/teacher.js` for the teacher dashboard (student list, subjects list, QR modal)
+   - `assets/js/student.js` for the student portal (subject picker, attendance UI)
 
 ---
 
