@@ -11,7 +11,7 @@
      *
      * To add a route:
      * 1. Add a public function to a controller.
-     * 2. Add one line here pointing to [ThatController::class, 'yourMethod'].
+     * 2. Add one line here pointing to [ControllerClassName::class, 'methodName'].
      */
 
     return [
