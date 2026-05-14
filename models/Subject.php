@@ -1,6 +1,8 @@
 <?php
     declare(strict_types=1);
 
+    require_once __DIR__ . '/../modelHelpers/SqlSearch.php';
+
     class Subject
     {
         private mysqli $conn;
@@ -97,8 +99,8 @@
         {
             $limit = max(1, min($limit, 200));
             $searchTrim = trim($search);
-            $tokens = self::splitSearchTerms($searchTrim);
-            $likePatterns = self::likePatternsFromTokens($tokens);
+            $tokens = SqlSearch::splitSearchTerms($searchTrim);
+            $likePatterns = SqlSearch::likePatternsFromTokens($tokens);
 
             if ($teacherId === null) {
                 if (strlen($searchTrim) < 2) {
@@ -109,7 +111,7 @@
                     return [];
                 }
 
-                $hay = self::subjectSearchHaystackSql();
+                $hay = SqlSearch::subjectJoinHaystackSql();
                 $whereParts = [];
                 foreach ($likePatterns as $_) {
                     $whereParts[] = $hay . ' LIKE ?';
@@ -130,7 +132,7 @@
 
                 $types = str_repeat('s', count($likePatterns)) . 'i';
                 $bind = array_merge($likePatterns, [$limit]);
-                if (!self::stmtBindParamsList($stmt, $types, $bind)) {
+                if (!SqlSearch::bindPreparedParams($stmt, $types, $bind)) {
                     $stmt->close();
 
                     return [];
@@ -157,7 +159,7 @@
             }
 
             if ($likePatterns !== []) {
-                $hay = self::subjectSearchHaystackSql();
+                $hay = SqlSearch::subjectJoinHaystackSql();
                 foreach ($likePatterns as $_) {
                     $base .= ' AND ' . $hay . ' LIKE ?';
                 }
@@ -186,7 +188,7 @@
             $types .= 'i';
             $bind[] = $limit;
 
-            if (!self::stmtBindParamsList($stmt, $types, $bind)) {
+            if (!SqlSearch::bindPreparedParams($stmt, $types, $bind)) {
                 $stmt->close();
 
                 return [];
@@ -199,87 +201,6 @@
             $stmt->close();
 
             return $rows;
-        }
-
-        /**
-         * SQL expression concatenating subject name, teacher name, and schedule for search.
-         *
-         * @return string
-         */
-        private static function subjectSearchHaystackSql(): string
-        {
-            return 'CONCAT_WS(\' \', s.subject_name, COALESCE(t.name, \'\'), CAST(s.schedule_time AS CHAR))';
-        }
-
-        /**
-         * Splits trimmed search input into non-whitespace tokens (Unicode-aware).
-         *
-         * @param string $search
-         * @return list<string>
-         */
-        private static function splitSearchTerms(string $search): array
-        {
-            if ($search === '') {
-                return [];
-            }
-
-            if (!preg_match_all('/\S+/u', $search, $m)) {
-                return [];
-            }
-
-            /** @var list<string> $out */
-            $out = [];
-            foreach ($m[0] as $word) {
-                $out[] = (string) $word;
-            }
-
-            return $out;
-        }
-
-        /**
-         * Builds SQL LIKE patterns with escaped wildcards for each token.
-         *
-         * @param list<string> $tokens
-         * @return list<string>
-         */
-        private static function likePatternsFromTokens(array $tokens): array
-        {
-            $patterns = [];
-            foreach ($tokens as $t) {
-                $patterns[] = '%' . self::escapeLike($t) . '%';
-            }
-
-            return $patterns;
-        }
-
-        /**
-         * Binds a variable-length parameter list to a mysqli prepared statement.
-         *
-         * @param \mysqli_stmt $stmt
-         * @param string $types mysqli bind_param type string
-         * @param list<mixed> $values
-         * @return bool
-         */
-        private static function stmtBindParamsList(\mysqli_stmt $stmt, string $types, array $values): bool
-        {
-            $refs = [];
-            $refs[] = &$types;
-            foreach ($values as $k => $_v) {
-                $refs[] = &$values[$k];
-            }
-
-            return call_user_func_array([$stmt, 'bind_param'], $refs);
-        }
-
-        /**
-         * Escapes backslash, percent, and underscore for safe SQL LIKE fragments.
-         *
-         * @param string $value
-         * @return string
-         */
-        private static function escapeLike(string $value): string
-        {
-            return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
         }
 
         /**
