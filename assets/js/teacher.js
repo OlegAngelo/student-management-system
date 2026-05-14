@@ -1,274 +1,559 @@
 (function () {
-    'use strict';
+	"use strict";
 
-    // Reveals the add-student panel and focuses its first field.
-    function showAddStudentForm() {
-        var panel = document.getElementById('add-student-panel');
-        if (!panel) {
-            return;
-        }
-        panel.removeAttribute('hidden');
-        var first = panel.querySelector('input, select, textarea');
-        if (first) {
-            first.focus();
-        }
-    }
+	// Reveals the add-student panel and focuses its first field.
+	function showAddStudentForm() {
+		var panel = document.getElementById("add-student-panel");
+		if (!panel) {
+			return;
+		}
+		panel.removeAttribute("hidden");
+		var first = panel.querySelector("input, select, textarea");
+		if (first) {
+			first.focus();
+		}
+	}
 
-    // Hides the add-student panel and resets its form.
-    function hideAddStudentForm() {
-        var panel = document.getElementById('add-student-panel');
-        if (!panel) {
-            return;
-        }
-        panel.setAttribute('hidden', '');
-        var form = panel.querySelector('form');
-        if (form) {
-            form.reset();
-        }
-    }
+	// Hides the add-student panel and resets its form.
+	function hideAddStudentForm() {
+		var panel = document.getElementById("add-student-panel");
+		if (!panel) {
+			return;
+		}
+		panel.setAttribute("hidden", "");
+		var form = panel.querySelector("form");
+		if (form) {
+			form.reset();
+		}
+	}
 
-    // Reveals the add-subject panel and focuses its first field.
-    function showAddSubjectForm() {
-        var panel = document.getElementById('add-subject-panel');
-        if (!panel) {
-            return;
-        }
-        panel.removeAttribute('hidden');
-        var first = panel.querySelector('input, select, textarea');
-        if (first) {
-            first.focus();
-        }
-    }
+	// Reveals the add-subject panel and focuses its first field.
+	function showAddSubjectForm() {
+		var panel = document.getElementById("add-subject-panel");
+		if (!panel) {
+			return;
+		}
+		panel.removeAttribute("hidden");
+		var first = panel.querySelector("input, select, textarea");
+		if (first) {
+			first.focus();
+		}
+	}
 
-    // Hides the add-subject panel and resets its form.
-    function hideAddSubjectForm() {
-        var panel = document.getElementById('add-subject-panel');
-        if (!panel) {
-            return;
-        }
-        panel.setAttribute('hidden', '');
-        var form = panel.querySelector('form');
-        if (form) {
-            form.reset();
-        }
-    }
+	// Hides the add-subject panel and resets its form.
+	function hideAddSubjectForm() {
+		var panel = document.getElementById("add-subject-panel");
+		if (!panel) {
+			return;
+		}
+		panel.setAttribute("hidden", "");
+		var form = panel.querySelector("form");
+		if (form) {
+			form.reset();
+		}
+	}
 
-    // Wires search and sort controls for the teacher dashboard student table.
-    function initStudentListToolbar() {
-        var listRoot = document.getElementById('student-list');
-        var searchEl = document.getElementById('student-list-search');
-        var sortEl = document.getElementById('student-list-sort');
-        if (!listRoot || !searchEl || !sortEl) {
-            return;
-        }
+	// Escapes HTML-sensitive characters before interpolating text into templates.
+	function escapeHtml(value) {
+		return String(value)
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+	}
 
-        var tbody = listRoot.querySelector('tbody');
-        if (!tbody) {
-            return;
-        }
+	// Fetches JSON from an API endpoint and rejects non-OK responses.
+	function fetchJson(url) {
+		return fetch(url, { credentials: "same-origin" }).then(function (response) {
+			if (!response.ok) {
+				throw new Error("bad status");
+			}
+			return response.json();
+		});
+	}
 
-        // Returns table rows that represent a student (have data-student-id).
-        function getDataRows() {
-            return [].slice.call(tbody.querySelectorAll('tr[data-student-id]'));
-        }
+	// Renders student rows from API data into the teacher table body.
+	function renderStudentRows(rows) {
+		var listRoot = document.getElementById("student-list");
+		if (!listRoot) {
+			return;
+		}
 
-        // Builds a lowercase string of searchable attributes for one row.
-        function rowHaystack(row) {
-            var id = (row.getAttribute('data-student-id') || '').toLowerCase();
-            var name = (row.getAttribute('data-name') || '').toLowerCase();
-            var year = (row.getAttribute('data-year') || '').toLowerCase();
-            var section = (row.getAttribute('data-section') || '').toLowerCase();
-            return id + ' ' + name + ' ' + year + ' ' + section;
-        }
+		var tbody = listRoot.querySelector("tbody");
+		if (!tbody) {
+			return;
+		}
 
-        // Shows or hides each row based on the search box substring match.
-        function applyFilter() {
-            var q = (searchEl.value || '').trim().toLowerCase();
-            // Sets row display from whether the query appears in the row haystack.
-            getDataRows().forEach(function (row) {
-                if (!q) {
-                    row.style.display = '';
-                    return;
-                }
-                row.style.display = rowHaystack(row).indexOf(q) !== -1 ? '' : 'none';
-            });
-        }
+		if (!rows || !rows.length) {
+			tbody.innerHTML = '<tr><td colspan="5">No students found.</td></tr>';
+			return;
+		}
 
-        // Reads the sort key value from data-* attributes on one table row.
-        function sortValue(row, key) {
-            if (key === 'id') {
-                return row.getAttribute('data-student-id') || '';
-            }
-            return row.getAttribute('data-' + key) || '';
-        }
+		var html = rows
+			.map(function (row) {
+				var sid = escapeHtml(row.student_id || "");
+				var name = escapeHtml(row.name || "");
+				var year = escapeHtml(row.year || "");
+				var section = escapeHtml(row.section || "");
 
-        // Compares two rows for Array.sort using the current sort mode string.
-        function compareRows(mode, a, b) {
-            var lastDash = mode.lastIndexOf('-');
-            var key = mode.slice(0, lastDash);
-            var desc = mode.slice(lastDash + 1) === 'desc';
-            var va = sortValue(a, key);
-            var vb = sortValue(b, key);
-            var n;
-            if (key === 'year') {
-                n = (parseInt(va, 10) || 0) - (parseInt(vb, 10) || 0);
-            } else if (key === 'id') {
-                n = va.localeCompare(vb, undefined, { numeric: true, sensitivity: 'base' });
-            } else {
-                n = va.localeCompare(vb, undefined, { sensitivity: 'base' });
-            }
-            if (desc) {
-                n = -n;
-            }
-            return n;
-        }
+				var editSvg =
+					'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+				var deleteSvg =
+					'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
+				var qrSvg =
+					'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>';
 
-        // Reorders tbody rows then reapplies the text filter.
-        function applySort() {
-            var mode = sortEl.value || 'name-asc';
-            var rows = getDataRows();
-            // Compares two rows using compareRows for the active sort mode.
-            rows.sort(function (a, b) {
-                return compareRows(mode, a, b);
-            });
-            // Moves each row node to the end in sorted order.
-            rows.forEach(function (row) {
-                tbody.appendChild(row);
-            });
-            applyFilter();
-        }
+				return (
+					'<tr data-student-id="' +
+					sid +
+					'" data-name="' +
+					name +
+					'" data-year="' +
+					year +
+					'" data-section="' +
+					section +
+					'">' +
+					"<td>" +
+					sid +
+					"</td>" +
+					"<td>" +
+					name +
+					"</td>" +
+					"<td>" +
+					year +
+					"</td>" +
+					"<td>" +
+					section +
+					"</td>" +
+					'<td class="student-list-table__actions">' +
+					'<div class="student-row-actions">' +
+					'<button type="button" class="subject-icon-btn" aria-label="Edit student ' +
+					sid +
+					'">' +
+					editSvg +
+					"</button>" +
+					'<button type="button" class="subject-icon-btn" aria-label="Delete student ' +
+					sid +
+					'">' +
+					deleteSvg +
+					"</button>" +
+					'<button type="button" class="subject-icon-btn student-qr-open-btn" aria-label="Show QR code for student ' +
+					sid +
+					'" data-student-id="' +
+					sid +
+					'">' +
+					qrSvg +
+					"</button>" +
+					"</div>" +
+					"</td>" +
+					"</tr>"
+				);
+			})
+			.join("");
 
-        searchEl.addEventListener('input', applyFilter);
-        sortEl.addEventListener('change', applySort);
-        applyFilter();
-    }
+		tbody.innerHTML = html;
+	}
 
-    // Filters subject schedule cards on the teacher page by subject name.
-    function initSubjectScheduleSearch() {
-        var root = document.getElementById('subject-schedule-list');
-        var searchEl = document.getElementById('subject-list-search');
-        if (!root || !searchEl) {
-            return;
-        }
+	// Renders subject cards from API data into the teacher subject list.
+	function renderSubjectCards(rows) {
+		var root = document.getElementById("subject-schedule-list");
+		if (!root) {
+			return;
+		}
 
-        // Toggles card visibility when the query matches data-subject-name.
-        function applySubjectFilter() {
-            var q = (searchEl.value || '').trim().toLowerCase();
-            var cards = root.querySelectorAll('.subject-schedule-card[data-subject-name]');
-            // Shows each card when its subject name contains the filter text.
-            cards.forEach(function (card) {
-                var name = (card.getAttribute('data-subject-name') || '').toLowerCase();
-                if (!q) {
-                    card.style.display = '';
-                    return;
-                }
-                card.style.display = name.indexOf(q) !== -1 ? '' : 'none';
-            });
-        }
+		if (!rows || !rows.length) {
+			root.innerHTML =
+				'<article class="subject-schedule-card" role="listitem" data-subject-name=""><div class="subject-schedule-card__meta"><span>No subjects found.</span></div></article>';
+			return;
+		}
 
-        searchEl.addEventListener('input', applySubjectFilter);
-        applySubjectFilter();
-    }
+		var html = rows
+			.map(function (row) {
+				var subjectName = escapeHtml(row.subject_name || "");
+				var teacherName = escapeHtml(row.teacher_name || "Unassigned teacher");
+				var scheduleTime = escapeHtml(row.schedule_time || "");
+				var lateAfterTime = escapeHtml(row.late_after_time || "");
 
-    // Opens/closes the student QR preview modal from list buttons and Escape.
-    function initStudentQrModal() {
-        var modal = document.getElementById('student-qr-modal');
-        if (!modal) {
-            return;
-        }
+				var editSvg =
+					'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+				var deleteSvg =
+					'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
 
-        var titleEl = document.getElementById('student-qr-modal-title');
-        var imgEl = document.getElementById('student-qr-modal-img');
-        var closeBtn = document.getElementById('student-qr-modal-close');
-        var backdrop = document.getElementById('student-qr-modal-backdrop');
-        var studentList = document.getElementById('student-list');
+				return (
+					'<article class="subject-schedule-card" role="listitem" data-subject-name="' +
+					subjectName +
+					'">' +
+					'<div class="subject-schedule-card__top">' +
+					'<h3 class="subject-schedule-card__title">' +
+					subjectName +
+					"</h3>" +
+					'<div class="subject-schedule-card__actions">' +
+					'<button type="button" class="subject-icon-btn" aria-label="Edit ' +
+					subjectName +
+					'">' +
+					editSvg +
+					"</button>" +
+					'<button type="button" class="subject-icon-btn" aria-label="Delete ' +
+					subjectName +
+					'">' +
+					deleteSvg +
+					"</button>" +
+					"</div>" +
+					"</div>" +
+					'<div class="subject-schedule-card__meta">' +
+					"<span>Teacher: " +
+					teacherName +
+					"</span>" +
+					"<span>Schedule: " +
+					scheduleTime +
+					"</span>" +
+					"<span>Late after: " +
+					lateAfterTime +
+					"</span>" +
+					"</div>" +
+					"</article>"
+				);
+			})
+			.join("");
 
-        /** Public QR image endpoint; swap for self-hosted generation later. Docs: https://goqr.me/api/doc/create-qr-code/ */
-        var qrImageBase = 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=';
-        var qrPreviewPayload = 'student-management:preview';
+		root.innerHTML = html;
+	}
 
-        // Returns the goqr.me image URL for a given QR payload string.
-        function qrImageUrlForPayload(payload) {
-            return qrImageBase + encodeURIComponent(payload);
-        }
+	// Loads teacher dashboard datasets from APIs and refreshes active filters.
+	function initTeacherDashboardApiData() {
+		var shell = document.querySelector(
+			"main.shell[data-students-api][data-subjects-api]",
+		);
+		if (!shell) {
+			return;
+		}
 
-        // Shows the modal, sets title/image from studentId, and locks body scroll.
-        function openModal(studentId) {
-            if (titleEl) {
-                titleEl.textContent = 'QR Code for ' + studentId;
-            }
-            if (imgEl) {
-                var payload = studentId ? 'student-management:' + studentId : qrPreviewPayload;
-                imgEl.alt = 'QR code for student ' + (studentId || 'preview');
-                imgEl.src = qrImageUrlForPayload(payload);
-            }
-            modal.removeAttribute('hidden');
-            document.body.style.overflow = 'hidden';
-            if (closeBtn) {
-                closeBtn.focus();
-            }
-        }
+		var studentsApi = shell.getAttribute("data-students-api");
+		var subjectsApi = shell.getAttribute("data-subjects-api");
+		if (!studentsApi || !subjectsApi) {
+			return;
+		}
 
-        // Hides the modal, restores scroll, and resets the image to the preview.
-        function closeModal() {
-            modal.setAttribute('hidden', '');
-            document.body.style.overflow = '';
-            if (imgEl) {
-                imgEl.src = qrImageUrlForPayload(qrPreviewPayload);
-                imgEl.alt = '';
-            }
-        }
+		fetchJson(studentsApi)
+			.then(function (data) {
+				var rows = data && data.students ? data.students : [];
+				renderStudentRows(rows);
+				var sortEl = document.getElementById("student-list-sort");
+				if (sortEl) {
+					sortEl.dispatchEvent(new Event("change", { bubbles: true }));
+				}
+			})
+			.catch(function () {
+				renderStudentRows([]);
+			});
 
-        // Closes the modal when Escape is pressed while it is open.
-        function onKeydown(e) {
-            if (e.key === 'Escape' && !modal.hasAttribute('hidden')) {
-                closeModal();
-            }
-        }
+		fetchJson(subjectsApi)
+			.then(function (data) {
+				var rows = data && data.subjects ? data.subjects : [];
+				renderSubjectCards(rows);
+				var searchEl = document.getElementById("subject-list-search");
+				if (searchEl) {
+					searchEl.dispatchEvent(new Event("input", { bubbles: true }));
+				}
+			})
+			.catch(function () {
+				renderSubjectCards([]);
+			});
+	}
 
-        if (studentList) {
-            // Opens the QR modal when a list row QR button is clicked.
-            studentList.addEventListener('click', function (e) {
-                var btn = e.target.closest('.student-qr-open-btn');
-                if (!btn || !studentList.contains(btn)) {
-                    return;
-                }
-                var sid = btn.getAttribute('data-student-id') || '';
-                openModal(sid);
-            });
-        }
+	// Wires search and sort controls for the teacher dashboard student table.
+	function initStudentListToolbar() {
+		var listRoot = document.getElementById("student-list");
+		var searchEl = document.getElementById("student-list-search");
+		var sortEl = document.getElementById("student-list-sort");
+		if (!listRoot || !searchEl || !sortEl) {
+			return;
+		}
 
-        if (closeBtn) {
-            closeBtn.addEventListener('click', closeModal);
-        }
-        if (backdrop) {
-            backdrop.addEventListener('click', closeModal);
-        }
+		var tbody = listRoot.querySelector("tbody");
+		if (!tbody) {
+			return;
+		}
 
-        document.addEventListener('keydown', onKeydown);
-    }
+		// Returns table rows that represent a student (have data-student-id).
+		function getDataRows() {
+			return [].slice.call(tbody.querySelectorAll("tr[data-student-id]"));
+		}
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var toggleBtn = document.getElementById('add-student-toggle');
-        var cancelBtn = document.getElementById('add-student-cancel');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', showAddStudentForm);
-        }
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', hideAddStudentForm);
-        }
+		// Builds a lowercase string of searchable attributes for one row.
+		function rowHaystack(row) {
+			var id = (row.getAttribute("data-student-id") || "").toLowerCase();
+			var name = (row.getAttribute("data-name") || "").toLowerCase();
+			var year = (row.getAttribute("data-year") || "").toLowerCase();
+			var section = (row.getAttribute("data-section") || "").toLowerCase();
+			return id + " " + name + " " + year + " " + section;
+		}
 
-        var subjectToggle = document.getElementById('add-subject-toggle');
-        var subjectCancel = document.getElementById('add-subject-cancel');
-        if (subjectToggle) {
-            subjectToggle.addEventListener('click', showAddSubjectForm);
-        }
-        if (subjectCancel) {
-            subjectCancel.addEventListener('click', hideAddSubjectForm);
-        }
+		// Shows or hides each row based on the search box substring match.
+		function applyFilter() {
+			var q = (searchEl.value || "").trim().toLowerCase();
+			// Sets row display from whether the query appears in the row haystack.
+			getDataRows().forEach(function (row) {
+				if (!q) {
+					row.style.display = "";
+					return;
+				}
+				row.style.display = rowHaystack(row).indexOf(q) !== -1 ? "" : "none";
+			});
+		}
 
-        initStudentListToolbar();
-        initSubjectScheduleSearch();
-        initStudentQrModal();
-    });
+		// Reads the sort key value from data-* attributes on one table row.
+		function sortValue(row, key) {
+			if (key === "id") {
+				return row.getAttribute("data-student-id") || "";
+			}
+			return row.getAttribute("data-" + key) || "";
+		}
+
+		// Compares two rows for Array.sort using the current sort mode string.
+		function compareRows(mode, a, b) {
+			var lastDash = mode.lastIndexOf("-");
+			var key = mode.slice(0, lastDash);
+			var desc = mode.slice(lastDash + 1) === "desc";
+			var va = sortValue(a, key);
+			var vb = sortValue(b, key);
+			var n;
+			if (key === "year") {
+				n = (parseInt(va, 10) || 0) - (parseInt(vb, 10) || 0);
+			} else if (key === "id") {
+				n = va.localeCompare(vb, undefined, { numeric: true, sensitivity: "base" });
+			} else {
+				n = va.localeCompare(vb, undefined, { sensitivity: "base" });
+			}
+			if (desc) {
+				n = -n;
+			}
+			return n;
+		}
+
+		// Reorders tbody rows then reapplies the text filter.
+		function applySort() {
+			var mode = sortEl.value || "name-asc";
+			var rows = getDataRows();
+			// Compares two rows using compareRows for the active sort mode.
+			rows.sort(function (a, b) {
+				return compareRows(mode, a, b);
+			});
+			// Moves each row node to the end in sorted order.
+			rows.forEach(function (row) {
+				tbody.appendChild(row);
+			});
+			applyFilter();
+		}
+
+		searchEl.addEventListener("input", applyFilter);
+		sortEl.addEventListener("change", applySort);
+		applyFilter();
+	}
+
+	// Filters subject schedule cards on the teacher page by subject name.
+	function initSubjectScheduleSearch() {
+		var root = document.getElementById("subject-schedule-list");
+		var searchEl = document.getElementById("subject-list-search");
+		if (!root || !searchEl) {
+			return;
+		}
+
+		// Toggles card visibility when the query matches data-subject-name.
+		function applySubjectFilter() {
+			var q = (searchEl.value || "").trim().toLowerCase();
+			var cards = root.querySelectorAll(
+				".subject-schedule-card[data-subject-name]",
+			);
+			// Shows each card when its subject name contains the filter text.
+			cards.forEach(function (card) {
+				var name = (card.getAttribute("data-subject-name") || "").toLowerCase();
+				if (!q) {
+					card.style.display = "";
+					return;
+				}
+				card.style.display = name.indexOf(q) !== -1 ? "" : "none";
+			});
+		}
+
+		searchEl.addEventListener("input", applySubjectFilter);
+		applySubjectFilter();
+	}
+
+	// Opens/closes the student QR preview modal from list buttons and Escape.
+	function initStudentQrModal() {
+		var modal = document.getElementById("student-qr-modal");
+		if (!modal) {
+			return;
+		}
+
+		var titleEl = document.getElementById("student-qr-modal-title");
+		var imgEl = document.getElementById("student-qr-modal-img");
+		var closeBtn = document.getElementById("student-qr-modal-close");
+		var backdrop = document.getElementById("student-qr-modal-backdrop");
+		var studentList = document.getElementById("student-list");
+
+		/** Public QR image endpoint; swap for self-hosted generation later. Docs: https://goqr.me/api/doc/create-qr-code/ */
+		var qrImageBase =
+			"https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=";
+		var qrPreviewPayload = "student-management:preview";
+
+		// Returns the goqr.me image URL for a given QR payload string.
+		function qrImageUrlForPayload(payload) {
+			return qrImageBase + encodeURIComponent(payload);
+		}
+
+		// Shows the modal, sets title/image from studentId, and locks body scroll.
+		function openModal(studentId) {
+			if (titleEl) {
+				titleEl.textContent = "QR Code for " + studentId;
+			}
+			if (imgEl) {
+				var payload = studentId
+					? "student-management:" + studentId
+					: qrPreviewPayload;
+				imgEl.alt = "QR code for student " + (studentId || "preview");
+				imgEl.src = qrImageUrlForPayload(payload);
+			}
+			modal.removeAttribute("hidden");
+			document.body.style.overflow = "hidden";
+			if (closeBtn) {
+				closeBtn.focus();
+			}
+		}
+
+		// Hides the modal, restores scroll, and resets the image to the preview.
+		function closeModal() {
+			modal.setAttribute("hidden", "");
+			document.body.style.overflow = "";
+			if (imgEl) {
+				imgEl.src = qrImageUrlForPayload(qrPreviewPayload);
+				imgEl.alt = "";
+			}
+		}
+
+		// Closes the modal when Escape is pressed while it is open.
+		function onKeydown(e) {
+			if (e.key === "Escape" && !modal.hasAttribute("hidden")) {
+				closeModal();
+			}
+		}
+
+		if (studentList) {
+			// Opens the QR modal when a list row QR button is clicked.
+			studentList.addEventListener("click", function (e) {
+				var btn = e.target.closest(".student-qr-open-btn");
+				if (!btn || !studentList.contains(btn)) {
+					return;
+				}
+				var sid = btn.getAttribute("data-student-id") || "";
+				openModal(sid);
+			});
+		}
+
+		if (closeBtn) {
+			closeBtn.addEventListener("click", closeModal);
+		}
+		if (backdrop) {
+			backdrop.addEventListener("click", closeModal);
+		}
+
+		document.addEventListener("keydown", onKeydown);
+	}
+
+	function initAddStudentForm() {
+		var form = document.getElementById("add-student-form");
+		if (!form) {
+			return;
+		}
+
+		var shell = document.querySelector("main.shell[data-students-api]");
+		if (!shell) {
+			return;
+		}
+
+		var studentsApi = shell.getAttribute("data-students-api");
+		if (!studentsApi) {
+			return;
+		}
+
+		form.addEventListener("submit", function (e) {
+			e.preventDefault();
+
+			var studentId = document.getElementById("student_id").value.trim();
+			var name = document.getElementById("name").value.trim();
+			var year = document.getElementById("year").value.trim();
+			var section = document.getElementById("section").value.trim();
+
+			if (!studentId || !name || !year || !section) {
+				alert("All fields are required");
+				return;
+			}
+
+			fetch(studentsApi, {
+				method: "POST",
+				credentials: "same-origin",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					student_id: studentId,
+					name: name,
+					year: year,
+					section: section,
+				}),
+			})
+				.then(function (response) {
+					return response.json().then(function (data) {
+						if (!response.ok) {
+							throw new Error(data.error || "Failed to create student");
+						}
+						return data;
+					});
+				})
+				.then(function () {
+					hideAddStudentForm();
+					initTeacherDashboardApiData();
+				})
+				.catch(function (error) {
+					alert("Error: " + error.message);
+				});
+		});
+	}
+
+	function initAddSubjectForm() {
+		var form = document.getElementById("add-subject-form");
+		if (!form) {
+			return;
+		}
+		form.addEventListener("submit", function (e) {
+			e.preventDefault();
+		});
+	}
+
+	document.addEventListener("DOMContentLoaded", function () {
+		var toggleBtn = document.getElementById("add-student-toggle");
+		var cancelBtn = document.getElementById("add-student-cancel");
+		if (toggleBtn) {
+			toggleBtn.addEventListener("click", showAddStudentForm);
+		}
+		if (cancelBtn) {
+			cancelBtn.addEventListener("click", hideAddStudentForm);
+		}
+
+		var subjectToggle = document.getElementById("add-subject-toggle");
+		var subjectCancel = document.getElementById("add-subject-cancel");
+		if (subjectToggle) {
+			subjectToggle.addEventListener("click", showAddSubjectForm);
+		}
+		if (subjectCancel) {
+			subjectCancel.addEventListener("click", hideAddSubjectForm);
+		}
+
+		initStudentListToolbar();
+		initSubjectScheduleSearch();
+		initTeacherDashboardApiData();
+		initStudentQrModal();
+		initAddStudentForm();
+		initAddSubjectForm();
+	});
 })();

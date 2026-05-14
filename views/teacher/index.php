@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl . '/assets/css/teacher.css') ?>">
 </head>
 <body>
-    <main class="shell">
+    <main class="shell"
+        data-students-api="<?= htmlspecialchars($baseUrl . '/teacher/api/students', ENT_QUOTES, 'UTF-8') ?>"
+        data-subjects-api="<?= htmlspecialchars($baseUrl . '/teacher/api/subjects', ENT_QUOTES, 'UTF-8') ?>">
         <h1 class="page-title">Teacher Dashboard</h1>
 
         <!-- student & subject container -->
@@ -24,7 +26,7 @@
                 <div id="add-student-panel" class="add-student-form-container" hidden>
                     <h3>Add New Student</h3>
 
-                    <form class="add-student-form">
+                    <form id="add-student-form" class="add-student-form">
                         <!-- student id -->
                         <label for="student_id">Student ID</label>
                         <input type="text" id="student_id" name="student_id" placeholder="123456789"
@@ -84,49 +86,14 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
-                                <th>Year</th>
-                                <th>Section</th>
+                                <th>Batch Year</th>
+                                <th>Group Section</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr data-student-id="2024100001" data-name="Juan Dela Cruz" data-year="2024" data-section="A">
-                                <td>2024100001</td>
-                                <td>Juan Dela Cruz</td>
-                                <td>2024</td>
-                                <td>A</td>
-                                <td class="student-list-table__actions">
-                                    <div class="student-row-actions">
-                                        <button type="button" class="subject-icon-btn" aria-label="Edit student 2024100001">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                        </button>
-                                        <button type="button" class="subject-icon-btn" aria-label="Delete student 2024100001">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                        </button>
-                                        <button type="button" class="subject-icon-btn student-qr-open-btn" aria-label="Show QR code for student 2024100001" data-student-id="2024100001" data-student-name="Juan Dela Cruz">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr data-student-id="2024100002" data-name="Maria Santos" data-year="2024" data-section="B">
-                                <td>2024100002</td>
-                                <td>Maria Santos</td>
-                                <td>2024</td>
-                                <td>B</td>
-                                <td class="student-list-table__actions">
-                                    <div class="student-row-actions">
-                                        <button type="button" class="subject-icon-btn" aria-label="Edit student 2024100002">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                        </button>
-                                        <button type="button" class="subject-icon-btn" aria-label="Delete student 2024100002">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                        </button>
-                                        <button type="button" class="subject-icon-btn student-qr-open-btn" aria-label="Show QR code for student 2024100002" data-student-id="2024100002" data-student-name="Maria Santos">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>
-                                        </button>
-                                    </div>
-                                </td>
+                            <tr>
+                                <td colspan="5">Loading students...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -144,7 +111,7 @@
                 <div id="add-subject-panel" class="add-subject-form-container" hidden>
                     <h3>Add New Subject</h3>
 
-                    <form class="add-subject-form">
+                    <form id="add-subject-form" class="add-subject-form">
                         <!-- subject name -->
                         <label for="subject_name">Subject Name</label>
                         <input type="text" id="subject_name" name="subject_name" placeholder="CPE 3222 - Web Development">
@@ -171,59 +138,11 @@
                         placeholder="Search by subject name…" autocomplete="off">
                 </div>
 
-                <!-- subject & schedule list (static sample data) -->
+                <!-- subject & schedule list (rendered from API) -->
                 <div class="subject-schedule-list" id="subject-schedule-list" role="list">
-                    <article class="subject-schedule-card" role="listitem" data-subject-name="Mathematics">
-                        <div class="subject-schedule-card__top">
-                            <h3 class="subject-schedule-card__title">Mathematics</h3>
-                            <div class="subject-schedule-card__actions">
-                                <button type="button" class="subject-icon-btn" aria-label="Edit Mathematics">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                </button>
-                                <button type="button" class="subject-icon-btn" aria-label="Delete Mathematics">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                </button>
-                            </div>
-                        </div>
+                    <article class="subject-schedule-card" role="listitem" data-subject-name="">
                         <div class="subject-schedule-card__meta">
-                            <span>Schedule: 08:00</span>
-                            <span>Late after: 08:15</span>
-                        </div>
-                    </article>
-
-                    <article class="subject-schedule-card" role="listitem" data-subject-name="Physics">
-                        <div class="subject-schedule-card__top">
-                            <h3 class="subject-schedule-card__title">Physics</h3>
-                            <div class="subject-schedule-card__actions">
-                                <button type="button" class="subject-icon-btn" aria-label="Edit Physics">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                </button>
-                                <button type="button" class="subject-icon-btn" aria-label="Delete Physics">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="subject-schedule-card__meta">
-                            <span>Schedule: 10:00</span>
-                            <span>Late after: 10:15</span>
-                        </div>
-                    </article>
-
-                    <article class="subject-schedule-card" role="listitem" data-subject-name="Chemistry">
-                        <div class="subject-schedule-card__top">
-                            <h3 class="subject-schedule-card__title">Chemistry</h3>
-                            <div class="subject-schedule-card__actions">
-                                <button type="button" class="subject-icon-btn" aria-label="Edit Chemistry">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                </button>
-                                <button type="button" class="subject-icon-btn" aria-label="Delete Chemistry">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="subject-schedule-card__meta">
-                            <span>Schedule: 13:00</span>
-                            <span>Late after: 13:15</span>
+                            <span>Loading subjects...</span>
                         </div>
                     </article>
                 </div>
