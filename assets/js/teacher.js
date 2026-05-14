@@ -1,6 +1,7 @@
 (function () {
     'use strict';
 
+    // Reveals the add-student panel and focuses its first field.
     function showAddStudentForm() {
         var panel = document.getElementById('add-student-panel');
         if (!panel) {
@@ -13,6 +14,7 @@
         }
     }
 
+    // Hides the add-student panel and resets its form.
     function hideAddStudentForm() {
         var panel = document.getElementById('add-student-panel');
         if (!panel) {
@@ -25,6 +27,7 @@
         }
     }
 
+    // Reveals the add-subject panel and focuses its first field.
     function showAddSubjectForm() {
         var panel = document.getElementById('add-subject-panel');
         if (!panel) {
@@ -37,6 +40,7 @@
         }
     }
 
+    // Hides the add-subject panel and resets its form.
     function hideAddSubjectForm() {
         var panel = document.getElementById('add-subject-panel');
         if (!panel) {
@@ -49,6 +53,7 @@
         }
     }
 
+    // Wires search and sort controls for the teacher dashboard student table.
     function initStudentListToolbar() {
         var listRoot = document.getElementById('student-list');
         var searchEl = document.getElementById('student-list-search');
@@ -62,10 +67,12 @@
             return;
         }
 
+        // Returns table rows that represent a student (have data-student-id).
         function getDataRows() {
             return [].slice.call(tbody.querySelectorAll('tr[data-student-id]'));
         }
 
+        // Builds a lowercase string of searchable attributes for one row.
         function rowHaystack(row) {
             var id = (row.getAttribute('data-student-id') || '').toLowerCase();
             var name = (row.getAttribute('data-name') || '').toLowerCase();
@@ -74,8 +81,10 @@
             return id + ' ' + name + ' ' + year + ' ' + section;
         }
 
+        // Shows or hides each row based on the search box substring match.
         function applyFilter() {
             var q = (searchEl.value || '').trim().toLowerCase();
+            // Sets row display from whether the query appears in the row haystack.
             getDataRows().forEach(function (row) {
                 if (!q) {
                     row.style.display = '';
@@ -85,6 +94,7 @@
             });
         }
 
+        // Reads the sort key value from data-* attributes on one table row.
         function sortValue(row, key) {
             if (key === 'id') {
                 return row.getAttribute('data-student-id') || '';
@@ -92,6 +102,7 @@
             return row.getAttribute('data-' + key) || '';
         }
 
+        // Compares two rows for Array.sort using the current sort mode string.
         function compareRows(mode, a, b) {
             var lastDash = mode.lastIndexOf('-');
             var key = mode.slice(0, lastDash);
@@ -112,12 +123,15 @@
             return n;
         }
 
+        // Reorders tbody rows then reapplies the text filter.
         function applySort() {
             var mode = sortEl.value || 'name-asc';
             var rows = getDataRows();
+            // Compares two rows using compareRows for the active sort mode.
             rows.sort(function (a, b) {
                 return compareRows(mode, a, b);
             });
+            // Moves each row node to the end in sorted order.
             rows.forEach(function (row) {
                 tbody.appendChild(row);
             });
@@ -129,6 +143,7 @@
         applyFilter();
     }
 
+    // Filters subject schedule cards on the teacher page by subject name.
     function initSubjectScheduleSearch() {
         var root = document.getElementById('subject-schedule-list');
         var searchEl = document.getElementById('subject-list-search');
@@ -136,9 +151,11 @@
             return;
         }
 
+        // Toggles card visibility when the query matches data-subject-name.
         function applySubjectFilter() {
             var q = (searchEl.value || '').trim().toLowerCase();
             var cards = root.querySelectorAll('.subject-schedule-card[data-subject-name]');
+            // Shows each card when its subject name contains the filter text.
             cards.forEach(function (card) {
                 var name = (card.getAttribute('data-subject-name') || '').toLowerCase();
                 if (!q) {
@@ -153,28 +170,7 @@
         applySubjectFilter();
     }
 
-    function initAttendanceScanner() {
-        var select = document.getElementById('subject_id');
-        var placeholder = document.getElementById('attendance-placeholder');
-        var scanner = document.getElementById('attendance-scanner');
-        if (!select || !placeholder || !scanner) {
-            return;
-        }
-
-        function update() {
-            if (select.value) {
-                placeholder.setAttribute('hidden', '');
-                scanner.removeAttribute('hidden');
-            } else {
-                scanner.setAttribute('hidden', '');
-                placeholder.removeAttribute('hidden');
-            }
-        }
-
-        select.addEventListener('change', update);
-        update();
-    }
-
+    // Opens/closes the student QR preview modal from list buttons and Escape.
     function initStudentQrModal() {
         var modal = document.getElementById('student-qr-modal');
         if (!modal) {
@@ -191,10 +187,12 @@
         var qrImageBase = 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=';
         var qrPreviewPayload = 'student-management:preview';
 
+        // Returns the goqr.me image URL for a given QR payload string.
         function qrImageUrlForPayload(payload) {
             return qrImageBase + encodeURIComponent(payload);
         }
 
+        // Shows the modal, sets title/image from studentId, and locks body scroll.
         function openModal(studentId) {
             if (titleEl) {
                 titleEl.textContent = 'QR Code for ' + studentId;
@@ -211,6 +209,7 @@
             }
         }
 
+        // Hides the modal, restores scroll, and resets the image to the preview.
         function closeModal() {
             modal.setAttribute('hidden', '');
             document.body.style.overflow = '';
@@ -220,6 +219,7 @@
             }
         }
 
+        // Closes the modal when Escape is pressed while it is open.
         function onKeydown(e) {
             if (e.key === 'Escape' && !modal.hasAttribute('hidden')) {
                 closeModal();
@@ -227,6 +227,7 @@
         }
 
         if (studentList) {
+            // Opens the QR modal when a list row QR button is clicked.
             studentList.addEventListener('click', function (e) {
                 var btn = e.target.closest('.student-qr-open-btn');
                 if (!btn || !studentList.contains(btn)) {
@@ -269,6 +270,5 @@
         initStudentListToolbar();
         initSubjectScheduleSearch();
         initStudentQrModal();
-        initAttendanceScanner();
     });
 })();
