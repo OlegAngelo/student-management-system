@@ -319,39 +319,72 @@
 		}
 
 		var titleEl = document.getElementById("student-qr-modal-title");
-		var imgEl = document.getElementById("student-qr-modal-img");
+		var containerEl = document.getElementById("student-qr-modal-container");
 		var closeBtn = document.getElementById("student-qr-modal-close");
 		var downloadBtn = document.getElementById("student-qr-modal-download");
 		var backdrop = document.getElementById("student-qr-modal-backdrop");
 		var studentList = document.getElementById("student-list");
 
 		var currentStudentId = null;
+		var currentQRCanvas = null;
 
-		// Get base URL from the shell element
-		var shell = document.querySelector("main.shell[data-students-api]");
-		var baseUrl = "";
-		if (shell) {
-			var studentsApi = shell.getAttribute("data-students-api") || "";
-			// Extract base URL by removing the /teacher/api/students part
-			baseUrl = studentsApi.replace("/teacher/api/students", "");
+		// Generates QR code and displays it in the modal.
+		function generateAndDisplayQR(studentId) {
+			// Clear previous QR code
+			if (containerEl) {
+				containerEl.innerHTML = "";
+			}
+
+			// Create canvas element for QR code
+			var canvas = document.createElement("canvas");
+			canvas.id = "student-qr-canvas";
+			canvas.style.display = "block";
+			canvas.style.margin = "0 auto";
+
+			if (containerEl) {
+				containerEl.appendChild(canvas);
+			}
+
+			try {
+				// Generate QR code with the student ID
+				var qr = new QRCode(canvas, {
+					text: "student-management:" + studentId,
+					width: 260,
+					height: 260,
+					colorDark: "#000000",
+					colorLight: "#ffffff",
+					correctLevel: QRCode.CorrectLevel.H,
+				});
+
+				currentQRCanvas = canvas;
+			} catch (e) {
+				if (containerEl) {
+					containerEl.innerHTML = '<p style="color: red;">Failed to generate QR code</p>';
+				}
+			}
 		}
 
-		// Downloads QR code as PNG file.
+		// Downloads the QR code as a PNG file.
 		function downloadQR() {
-			if (!currentStudentId) {
-				alert("No student selected");
+			if (!currentQRCanvas) {
+				alert("QR code not generated");
 				return;
 			}
 
-			var link = document.createElement("a");
-			link.href = baseUrl + "/qr/download?student_id=" + encodeURIComponent(currentStudentId);
-			link.download = "qr-" + currentStudentId + ".png";
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
+			// Convert canvas to blob and download
+			currentQRCanvas.toBlob(function (blob) {
+				var url = URL.createObjectURL(blob);
+				var link = document.createElement("a");
+				link.href = url;
+				link.download = "qr-" + currentStudentId + ".png";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+			}, "image/png");
 		}
 
-		// Shows the modal, sets title/image from studentId, and locks body scroll.
+		// Shows the modal and generates QR code.
 		function openModal(studentId) {
 			currentStudentId = studentId;
 
@@ -359,26 +392,7 @@
 				titleEl.textContent = "QR Code for " + studentId;
 			}
 
-			if (imgEl) {
-				imgEl.alt = "QR code for student " + studentId;
-				fetch(baseUrl + "/qr/image-url?student_id=" + encodeURIComponent(studentId), {
-					credentials: "same-origin",
-				})
-					.then(function (r) {
-						if (!r.ok) throw new Error("Failed to fetch QR");
-						return r.json();
-					})
-					.then(function (data) {
-						if (imgEl && data.url) {
-							imgEl.src = data.url;
-						}
-					})
-					.catch(function () {
-						if (imgEl) {
-							imgEl.alt = "Failed to load QR code";
-						}
-					});
-			}
+			generateAndDisplayQR(studentId);
 
 			modal.removeAttribute("hidden");
 			document.body.style.overflow = "hidden";
@@ -387,14 +401,15 @@
 			}
 		}
 
-		// Hides the modal, restores scroll.
+		// Hides the modal and restores scroll.
 		function closeModal() {
 			modal.setAttribute("hidden", "");
 			document.body.style.overflow = "";
 			currentStudentId = null;
+			currentQRCanvas = null;
 		}
 
-		// Closes the modal when Escape is pressed while it is open.
+		// Closes the modal when Escape is pressed.
 		function onKeydown(e) {
 			if (e.key === "Escape" && !modal.hasAttribute("hidden")) {
 				closeModal();
@@ -420,6 +435,7 @@
 		if (closeBtn) {
 			closeBtn.addEventListener("click", closeModal);
 		}
+
 		if (backdrop) {
 			backdrop.addEventListener("click", closeModal);
 		}

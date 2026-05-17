@@ -7,11 +7,9 @@
     require ROOT . '/models/Teacher.php';
     require ROOT . '/models/Subject.php';
     require ROOT . '/models/Attendance.php';
-    require ROOT . '/services/QRCodeService.php';
     require ROOT . '/controllers/HomeController.php';
     require ROOT . '/controllers/TeacherController.php';
     require ROOT . '/controllers/StudentController.php';
-    require ROOT . '/controllers/QRController.php';
 
     // base URL (for links/assets), example: /student-management-system
     $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));

@@ -21,8 +21,6 @@
         'POST:/teacher/api/students' => [TeacherController::class, 'createStudent'],
         'DELETE:/teacher/api/students' => [TeacherController::class, 'deleteStudent'],
         'GET:/teacher/api/subjects' => [TeacherController::class, 'subjectsJson'],
-        'GET:/qr/download' => [QRController::class, 'download'],
-        'GET:/qr/image-url' => [QRController::class, 'imageUrl'],
         '/student' => [StudentController::class, 'index'],
         '/student/subjects' => [StudentController::class, 'subjectsJson'],
     ];
