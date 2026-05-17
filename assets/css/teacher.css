@@ -257,6 +257,18 @@
     color: #fff;
 }
 
+.subject-icon-btn.student-delete-btn {
+    background: #d32f2f;
+    border-color: #b71c1c;
+    color: #fff;
+}
+
+.subject-icon-btn.student-delete-btn:hover {
+    background: #b71c1c;
+    border-color: #8e1111;
+    color: #fff;
+}
+
 .subject-schedule-card__meta {
     margin-top: 10px;
     display: flex;
