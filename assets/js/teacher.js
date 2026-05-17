@@ -321,31 +321,65 @@
 		var titleEl = document.getElementById("student-qr-modal-title");
 		var imgEl = document.getElementById("student-qr-modal-img");
 		var closeBtn = document.getElementById("student-qr-modal-close");
+		var downloadBtn = document.getElementById("student-qr-modal-download");
 		var backdrop = document.getElementById("student-qr-modal-backdrop");
 		var studentList = document.getElementById("student-list");
 
-		/** Public QR image endpoint; swap for self-hosted generation later. Docs: https://goqr.me/api/doc/create-qr-code/ */
-		var qrImageBase =
-			"https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=";
-		var qrPreviewPayload = "student-management:preview";
+		var currentStudentId = null;
 
-		// Returns the goqr.me image URL for a given QR payload string.
-		function qrImageUrlForPayload(payload) {
-			return qrImageBase + encodeURIComponent(payload);
+		// Get base URL from the shell element
+		var shell = document.querySelector("main.shell[data-students-api]");
+		var baseUrl = "";
+		if (shell) {
+			var studentsApi = shell.getAttribute("data-students-api") || "";
+			// Extract base URL by removing the /teacher/api/students part
+			baseUrl = studentsApi.replace("/teacher/api/students", "");
+		}
+
+		// Downloads QR code as PNG file.
+		function downloadQR() {
+			if (!currentStudentId) {
+				alert("No student selected");
+				return;
+			}
+
+			var link = document.createElement("a");
+			link.href = baseUrl + "/qr/download?student_id=" + encodeURIComponent(currentStudentId);
+			link.download = "qr-" + currentStudentId + ".png";
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
 		}
 
 		// Shows the modal, sets title/image from studentId, and locks body scroll.
 		function openModal(studentId) {
+			currentStudentId = studentId;
+
 			if (titleEl) {
 				titleEl.textContent = "QR Code for " + studentId;
 			}
+
 			if (imgEl) {
-				var payload = studentId
-					? "student-management:" + studentId
-					: qrPreviewPayload;
-				imgEl.alt = "QR code for student " + (studentId || "preview");
-				imgEl.src = qrImageUrlForPayload(payload);
+				imgEl.alt = "QR code for student " + studentId;
+				fetch(baseUrl + "/qr/image-url?student_id=" + encodeURIComponent(studentId), {
+					credentials: "same-origin",
+				})
+					.then(function (r) {
+						if (!r.ok) throw new Error("Failed to fetch QR");
+						return r.json();
+					})
+					.then(function (data) {
+						if (imgEl && data.url) {
+							imgEl.src = data.url;
+						}
+					})
+					.catch(function () {
+						if (imgEl) {
+							imgEl.alt = "Failed to load QR code";
+						}
+					});
 			}
+
 			modal.removeAttribute("hidden");
 			document.body.style.overflow = "hidden";
 			if (closeBtn) {
@@ -353,14 +387,11 @@
 			}
 		}
 
-		// Hides the modal, restores scroll, and resets the image to the preview.
+		// Hides the modal, restores scroll.
 		function closeModal() {
 			modal.setAttribute("hidden", "");
 			document.body.style.overflow = "";
-			if (imgEl) {
-				imgEl.src = qrImageUrlForPayload(qrPreviewPayload);
-				imgEl.alt = "";
-			}
+			currentStudentId = null;
 		}
 
 		// Closes the modal when Escape is pressed while it is open.
@@ -380,6 +411,10 @@
 				var sid = btn.getAttribute("data-student-id") || "";
 				openModal(sid);
 			});
+		}
+
+		if (downloadBtn) {
+			downloadBtn.addEventListener("click", downloadQR);
 		}
 
 		if (closeBtn) {

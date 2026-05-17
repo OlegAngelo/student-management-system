@@ -158,15 +158,18 @@
                 <img
                     id="student-qr-modal-img"
                     class="modal-qr-panel__qr-img"
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&amp;margin=8&amp;data=student-management%3Apreview"
-                    width="280"
-                    height="280"
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&amp;margin=10&amp;data=loading"
+                    width="300"
+                    height="300"
                     alt=""
                     decoding="async"
                     referrerpolicy="no-referrer-when-downgrade"
                 >
             </div>
-            <button type="button" class="modal-qr-panel__close" id="student-qr-modal-close">Close</button>
+            <div class="modal-qr-panel__actions">
+                <button type="button" class="button primary" id="student-qr-modal-download">Download QR</button>
+                <button type="button" class="button secondary" id="student-qr-modal-close">Close</button>
+            </div>
         </div>
     </div>
 
