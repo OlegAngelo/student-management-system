@@ -516,6 +516,123 @@
 		});
 	}
 
+	// Opens/closes the edit student modal from list buttons and Escape.
+	function initEditStudentModal() {
+		var modal = document.getElementById("student-edit-modal");
+		if (!modal) {
+			return;
+		}
+
+		var closeBtn = document.getElementById("student-edit-modal-close");
+		var backdrop = document.getElementById("student-edit-modal-backdrop");
+		var studentList = document.getElementById("student-list");
+
+		var shell = document.querySelector("main.shell[data-students-api]");
+		if (!shell) {
+			return;
+		}
+
+		var studentsApi = shell.getAttribute("data-students-api");
+		if (!studentsApi) {
+			return;
+		}
+
+		// Fills the form fields, shows the modal, and locks body scroll.
+		function openModal(btn) {
+			var row = btn.closest("tr");
+			document.getElementById("edit_student_id").value = btn.getAttribute("data-student-id") || "";
+			document.getElementById("edit_name").value = row ? (row.getAttribute("data-name") || "") : "";
+			document.getElementById("edit_year").value = row ? (row.getAttribute("data-year") || "") : "";
+			document.getElementById("edit_section").value = row ? (row.getAttribute("data-section") || "") : "";
+			modal.removeAttribute("hidden");
+			document.body.style.overflow = "hidden";
+			document.getElementById("edit_name").focus();
+		}
+
+		// Hides the modal, restores scroll, and resets the form.
+		function closeModal() {
+			modal.setAttribute("hidden", "");
+			document.body.style.overflow = "";
+			var form = document.getElementById("edit-student-form");
+			if (form) {
+				form.reset();
+			}
+		}
+
+		// Closes the modal when Escape is pressed while it is open.
+		function onKeydown(e) {
+			if (e.key === "Escape" && !modal.hasAttribute("hidden")) {
+				closeModal();
+			}
+		}
+
+		if (studentList) {
+			// Opens the edit modal when a list row edit button is clicked.
+			studentList.addEventListener("click", function (e) {
+				var btn = e.target.closest(".student-edit-btn");
+				if (!btn || !studentList.contains(btn)) {
+					return;
+				}
+				openModal(btn);
+			});
+		}
+
+		if (closeBtn) {
+			closeBtn.addEventListener("click", closeModal);
+		}
+		if (backdrop) {
+			backdrop.addEventListener("click", closeModal);
+		}
+
+		document.addEventListener("keydown", onKeydown);
+
+		// Submits the edit form as a PUT request.
+		var form = document.getElementById("edit-student-form");
+		if (form) {
+			form.addEventListener("submit", function (e) {
+				e.preventDefault();
+
+				var studentId = document.getElementById("edit_student_id").value.trim();
+				var name = document.getElementById("edit_name").value.trim();
+				var year = document.getElementById("edit_year").value.trim();
+				var section = document.getElementById("edit_section").value.trim();
+
+				if (!studentId || !name || !year || !section) {
+					alert("All fields are required.");
+					return;
+				}
+
+				fetch(studentsApi, {
+					method: "PUT",
+					credentials: "same-origin",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						student_id: studentId,
+						name: name,
+						year: year,
+						section: section,
+					}),
+				})
+					.then(function (response) {
+						return response.json().then(function (data) {
+							if (!response.ok) {
+								throw new Error(data.error || "Failed to update student");
+							}
+							return data;
+						});
+					})
+					.then(function () {
+						closeModal();
+						alert("Student updated successfully.");
+						initTeacherDashboardApiData();
+					})
+					.catch(function (error) {
+						alert("Error: " + error.message);
+					});
+			});
+		}
+	}
+
 	document.addEventListener("DOMContentLoaded", function () {
 		var toggleBtn = document.getElementById("add-student-toggle");
 		var cancelBtn = document.getElementById("add-student-cancel");
@@ -541,6 +658,7 @@
 		initStudentQrModal();
 		initAddStudentForm();
 		initDeleteStudent();
+		initEditStudentModal();
 		initAddSubjectForm();
 	});
 })();
