@@ -84,7 +84,11 @@
             }
 
             $stmt->bind_param('ssss', $studentId, $name, $year, $section);
-            $ok = $stmt->execute();
+            try {
+                $ok = $stmt->execute();
+            } catch (\mysqli_sql_exception $e) {
+                $ok = false;
+            }
             $stmt->close();
 
             return $ok;

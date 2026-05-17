@@ -86,14 +86,20 @@
             }
 
             $studentModel = new Student();
-            $ok = $studentModel->create($studentId, $name, $year, $section);
+            try {
+                $ok = $studentModel->create($studentId, $name, $year, $section);
+            } catch (\Exception $e) {
+                $ok = false;
+            }
 
             if ($ok) {
                 http_response_code(201);
                 echo json_encode(['success' => true, 'data' => ['student_id' => $studentId, 'name' => $name, 'year' => $year, 'section' => $section]], JSON_UNESCAPED_UNICODE);
             } else {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'error' => 'Failed to create student (duplicate ID or database error)'], JSON_UNESCAPED_UNICODE);
+                $existing = $studentModel->findByStudentId($studentId);
+                $error = $existing ? 'Student ID already exists' : 'Failed to create student';
+                echo json_encode(['success' => false, 'error' => $error], JSON_UNESCAPED_UNICODE);
             }
         }
 
