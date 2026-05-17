@@ -442,6 +442,7 @@
 				})
 				.then(function () {
 					hideAddStudentForm();
+					alert("Student added successfully.");
 					initTeacherDashboardApiData();
 				})
 				.catch(function (error) {
