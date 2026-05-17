@@ -170,6 +170,7 @@
         </div>
     </div>
 
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-row-helpers.js') ?>"></script>
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher.js') ?>"></script>
 </body>
 </html>

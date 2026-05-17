@@ -53,16 +53,6 @@
 		}
 	}
 
-	// Escapes HTML-sensitive characters before interpolating text into templates.
-	function escapeHtml(value) {
-		return String(value)
-			.replace(/&/g, "&amp;")
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;")
-			.replace(/"/g, "&quot;")
-			.replace(/'/g, "&#39;");
-	}
-
 	// Fetches JSON from an API endpoint and rejects non-OK responses.
 	function fetchJson(url) {
 		return fetch(url, { credentials: "same-origin" }).then(function (response) {
@@ -90,67 +80,7 @@
 			return;
 		}
 
-		var html = rows
-			.map(function (row) {
-				var sid = escapeHtml(row.student_id || "");
-				var name = escapeHtml(row.name || "");
-				var year = escapeHtml(row.year || "");
-				var section = escapeHtml(row.section || "");
-
-				var editSvg =
-					'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
-				var deleteSvg =
-					'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>';
-				var qrSvg =
-					'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>';
-
-				return (
-					'<tr data-student-id="' +
-					sid +
-					'" data-name="' +
-					name +
-					'" data-year="' +
-					year +
-					'" data-section="' +
-					section +
-					'">' +
-					"<td>" +
-					sid +
-					"</td>" +
-					"<td>" +
-					name +
-					"</td>" +
-					"<td>" +
-					year +
-					"</td>" +
-					"<td>" +
-					section +
-					"</td>" +
-					'<td class="student-list-table__actions">' +
-					'<div class="student-row-actions">' +
-					'<button type="button" class="subject-icon-btn" aria-label="Edit student ' +
-					sid +
-					'">' +
-					editSvg +
-					"</button>" +
-					'<button type="button" class="subject-icon-btn" aria-label="Delete student ' +
-					sid +
-					'">' +
-					deleteSvg +
-					"</button>" +
-					'<button type="button" class="subject-icon-btn student-qr-open-btn" aria-label="Show QR code for student ' +
-					sid +
-					'" data-student-id="' +
-					sid +
-					'">' +
-					qrSvg +
-					"</button>" +
-					"</div>" +
-					"</td>" +
-					"</tr>"
-				);
-			})
-			.join("");
+		var html = rows.map(buildStudentRow).join("");
 
 		tbody.innerHTML = html;
 	}
@@ -194,7 +124,7 @@
 					'">' +
 					editSvg +
 					"</button>" +
-					'<button type="button" class="subject-icon-btn" aria-label="Delete ' +
+					'<button type="button" class="subject-icon-btn student-delete-btn" aria-label="Delete ' +
 					subjectName +
 					'">' +
 					deleteSvg +
@@ -530,6 +460,62 @@
 		});
 	}
 
+	// Handles delete button clicks on student rows via event delegation.
+	function initDeleteStudent() {
+		var studentList = document.getElementById("student-list");
+		if (!studentList) {
+			return;
+		}
+
+		var shell = document.querySelector("main.shell[data-students-api]");
+		if (!shell) {
+			return;
+		}
+
+		var studentsApi = shell.getAttribute("data-students-api");
+		if (!studentsApi) {
+			return;
+		}
+
+		studentList.addEventListener("click", function (e) {
+			var btn = e.target.closest(".student-delete-btn");
+			if (!btn || !studentList.contains(btn)) {
+				return;
+			}
+
+			var studentId = btn.getAttribute("data-student-id") || "";
+			if (!studentId) {
+				return;
+			}
+
+			if (!confirm("Delete student " + studentId + "? This cannot be undone.")) {
+				return;
+			}
+
+			fetch(studentsApi, {
+				method: "DELETE",
+				credentials: "same-origin",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ student_id: studentId }),
+			})
+				.then(function (response) {
+					return response.json().then(function (data) {
+						if (!response.ok) {
+							throw new Error(data.error || "Failed to delete student");
+						}
+						return data;
+					});
+				})
+				.then(function () {
+					alert("Student " + studentId + " deleted successfully.");
+					initTeacherDashboardApiData();
+				})
+				.catch(function (error) {
+					alert("Error: " + error.message);
+				});
+		});
+	}
+
 	document.addEventListener("DOMContentLoaded", function () {
 		var toggleBtn = document.getElementById("add-student-toggle");
 		var cancelBtn = document.getElementById("add-student-cancel");
@@ -554,6 +540,7 @@
 		initTeacherDashboardApiData();
 		initStudentQrModal();
 		initAddStudentForm();
+		initDeleteStudent();
 		initAddSubjectForm();
 	});
 })();
