@@ -133,7 +133,7 @@
 					'">' +
 					editSvg +
 					"</button>" +
-					'<button type="button" class="subject-icon-btn" aria-label="Delete student ' +
+					'<button type="button" class="subject-icon-btn student-delete-btn" aria-label="Delete student ' +
 					sid +
 					'">' +
 					deleteSvg +
@@ -530,6 +530,62 @@
 		});
 	}
 
+	// Handles delete button clicks on student rows via event delegation.
+	function initDeleteStudent() {
+		var studentList = document.getElementById("student-list");
+		if (!studentList) {
+			return;
+		}
+
+		var shell = document.querySelector("main.shell[data-students-api]");
+		if (!shell) {
+			return;
+		}
+
+		var studentsApi = shell.getAttribute("data-students-api");
+		if (!studentsApi) {
+			return;
+		}
+
+		studentList.addEventListener("click", function (e) {
+			var btn = e.target.closest(".student-delete-btn");
+			if (!btn || !studentList.contains(btn)) {
+				return;
+			}
+
+			var studentId = btn.getAttribute("data-student-id") || "";
+			if (!studentId) {
+				return;
+			}
+
+			if (!confirm("Delete student " + studentId + "? This cannot be undone.")) {
+				return;
+			}
+
+			fetch(studentsApi, {
+				method: "DELETE",
+				credentials: "same-origin",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ student_id: studentId }),
+			})
+				.then(function (response) {
+					return response.json().then(function (data) {
+						if (!response.ok) {
+							throw new Error(data.error || "Failed to delete student");
+						}
+						return data;
+					});
+				})
+				.then(function () {
+					alert("Student " + studentId + " deleted successfully.");
+					initTeacherDashboardApiData();
+				})
+				.catch(function (error) {
+					alert("Error: " + error.message);
+				});
+		});
+	}
+
 	document.addEventListener("DOMContentLoaded", function () {
 		var toggleBtn = document.getElementById("add-student-toggle");
 		var cancelBtn = document.getElementById("add-student-cancel");
@@ -554,6 +610,7 @@
 		initTeacherDashboardApiData();
 		initStudentQrModal();
 		initAddStudentForm();
+		initDeleteStudent();
 		initAddSubjectForm();
 	});
 })();

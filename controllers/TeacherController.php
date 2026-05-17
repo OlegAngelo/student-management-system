@@ -96,5 +96,33 @@
                 echo json_encode(['success' => false, 'error' => 'Failed to create student (duplicate ID or database error)'], JSON_UNESCAPED_UNICODE);
             }
         }
+
+        /**
+         * Deletes a student by student_id from DELETE JSON data.
+         */
+        public function deleteStudent(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+            $studentId = trim($input['student_id'] ?? '');
+
+            if (!$studentId) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'student_id is required'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $studentModel = new Student();
+            $ok = $studentModel->deleteByStudentId($studentId);
+
+            if ($ok) {
+                echo json_encode(['success' => true, 'message' => 'Student deleted successfully.'], JSON_UNESCAPED_UNICODE);
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Failed to delete student.'], JSON_UNESCAPED_UNICODE);
+            }
+        }
     }
 ?>
