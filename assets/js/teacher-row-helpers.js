@@ -17,7 +17,9 @@ function buildStudentRowActions(studentId) {
 
 	return (
 		'<div class="student-row-actions">' +
-		'<button type="button" class="subject-icon-btn" aria-label="Edit student ' +
+		'<button type="button" class="subject-icon-btn student-edit-btn" aria-label="Edit student ' +
+		studentId +
+		'" data-student-id="' +
 		studentId +
 		'">' +
 		editSvg +

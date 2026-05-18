@@ -130,5 +130,38 @@
                 echo json_encode(['success' => false, 'error' => 'Failed to delete student.'], JSON_UNESCAPED_UNICODE);
             }
         }
+
+
+
+        /**
+         * Updates a student's name, year, and section from PUT JSON data.
+         */
+        public function updateStudent(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+            $studentId = trim($input['student_id'] ?? '');
+            $name      = trim($input['name'] ?? '');
+            $year      = trim($input['year'] ?? '');
+            $section   = trim($input['section'] ?? '');
+
+            if (!$studentId || !$name || !$year || !$section) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'All fields are required'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $studentModel = new Student();
+            $ok = $studentModel->updateByStudentId($studentId, $name, $year, $section);
+
+            if ($ok) {
+                echo json_encode(['success' => true, 'message' => 'Student updated successfully.'], JSON_UNESCAPED_UNICODE);
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Failed to update student.'], JSON_UNESCAPED_UNICODE);
+            }
+        }
     }
 ?>
