@@ -170,6 +170,39 @@
         </div>
     </div>
 
+    <!-- edit student modal -->
+    <div id="student-edit-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="student-edit-modal-title">
+        <button type="button" class="modal__backdrop" id="student-edit-modal-backdrop" tabindex="-1" aria-label="Close dialog"></button>
+        <div class="modal__panel modal-edit-panel">
+            <h2 id="student-edit-modal-title" class="modal-edit-panel__title">Edit Student</h2>
+
+            <form id="edit-student-form" class="add-student-form">
+                <label for="edit_student_id">Student ID</label>
+                <input type="text" id="edit_student_id" name="student_id" readonly>
+
+                <label for="edit_name">Name</label>
+                <input type="text" id="edit_name" name="name" autocomplete="off">
+
+                <label for="edit_year">Batch Year</label>
+                <input type="text" id="edit_year" name="year"
+                    pattern="[0-9]+" inputmode="numeric" autocomplete="off"
+                    title="Batch Year must contain only digits (0–9).">
+
+                <label for="edit_section">Section</label>
+                <select id="edit_section" name="section" required>
+                    <option value="" disabled>Select Section</option>
+                    <option value="A">Group 1</option>
+                    <option value="B">Group 2</option>
+                </select>
+
+                <div class="action-btns">
+                    <button type="submit" class="button primary">Save Changes</button>
+                    <button type="button" id="student-edit-modal-close" class="button secondary">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-row-helpers.js') ?>"></script>
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher.js') ?>"></script>
 </body>
