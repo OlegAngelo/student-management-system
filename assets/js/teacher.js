@@ -855,6 +855,8 @@
 				});
 		});
 	}
+
+	document.addEventListener("DOMContentLoaded", function () {
 		var toggleBtn = document.getElementById("add-student-toggle");
 		var cancelBtn = document.getElementById("add-student-cancel");
 		if (toggleBtn) {

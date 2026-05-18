@@ -260,4 +260,5 @@
                 echo json_encode(['success' => false, 'error' => 'Failed to delete subject.'], JSON_UNESCAPED_UNICODE);
             }
         }
+    }
 ?>
