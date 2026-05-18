@@ -260,5 +260,121 @@
                 echo json_encode(['success' => false, 'error' => 'Failed to delete subject.'], JSON_UNESCAPED_UNICODE);
             }
         }
+
+        /**
+         * JSON list of teachers for the teacher dropdown.
+         */
+        public function teachersJson(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $teacherModel = new Teacher();
+            $rows = $teacherModel->all();
+
+            $teachers = array_map(
+                static function (array $row): array {
+                    return [
+                        'id' => (int) ($row['id'] ?? 0),
+                        'name' => (string) ($row['name'] ?? ''),
+                        'subject' => (string) ($row['subject'] ?? ''),
+                    ];
+                },
+                $rows
+            );
+
+            echo json_encode(['teachers' => $teachers], JSON_UNESCAPED_UNICODE);
+        }
+
+        /**
+         * Creates a new teacher from POST JSON data.
+         */
+        public function createTeacher(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+
+            $name = trim($input['name'] ?? '');
+            $subject = trim($input['subject'] ?? '');
+
+            if (!$name || !$subject) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Teacher name and subject are required'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $teacherModel = new Teacher();
+            try {
+                $ok = $teacherModel->create($name, $subject);
+            } catch (\Exception $e) {
+                $ok = false;
+            }
+
+            if ($ok) {
+                http_response_code(201);
+                echo json_encode(['success' => true, 'message' => 'Teacher created successfully.'], JSON_UNESCAPED_UNICODE);
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Failed to create teacher.'], JSON_UNESCAPED_UNICODE);
+            }
+        }
+
+        /**
+         * Updates a teacher from PUT JSON data.
+         */
+        public function updateTeacher(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+            $id = (int) ($input['id'] ?? 0);
+            $name = trim($input['name'] ?? '');
+            $subject = trim($input['subject'] ?? '');
+
+            if (!$id || !$name || !$subject) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'ID, name, and subject are required'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $teacherModel = new Teacher();
+            $ok = $teacherModel->updateById($id, $name, $subject);
+
+            if ($ok) {
+                echo json_encode(['success' => true, 'message' => 'Teacher updated successfully.'], JSON_UNESCAPED_UNICODE);
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Failed to update teacher.'], JSON_UNESCAPED_UNICODE);
+            }
+        }
+
+        /**
+         * Deletes a teacher from DELETE JSON data.
+         */
+        public function deleteTeacher(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+            $id = (int) ($input['id'] ?? 0);
+
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Teacher ID is required'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $teacherModel = new Teacher();
+            $ok = $teacherModel->deleteById($id);
+
+            if ($ok) {
+                echo json_encode(['success' => true, 'message' => 'Teacher deleted successfully.'], JSON_UNESCAPED_UNICODE);
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Failed to delete teacher.'], JSON_UNESCAPED_UNICODE);
+            }
+        }
     }
 ?>

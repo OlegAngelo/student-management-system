@@ -854,6 +854,305 @@
 					alert("Error: " + error.message);
 				});
 		});
+		// Handle delete button
+		subjectList.addEventListener("click", function (e) {
+			var btn = e.target.closest(".subject-delete-btn");
+			if (!btn || !subjectList.contains(btn)) {
+				return;
+			}
+
+			var subjectId = btn.getAttribute("data-subject-id");
+			if (!subjectId) {
+				return;
+			}
+
+			if (!confirm("Delete this subject? This cannot be undone.")) {
+				return;
+			}
+
+			fetch(subjectsApi, {
+				method: "DELETE",
+				credentials: "same-origin",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ id: parseInt(subjectId) }),
+			})
+				.then(function (response) {
+					return response.json().then(function (data) {
+						if (!response.ok) {
+							throw new Error(data.error || "Failed to delete subject");
+						}
+						return data;
+					});
+				})
+				.then(function () {
+					alert("Subject deleted successfully.");
+					initTeacherDashboardApiData();
+				})
+				.catch(function (error) {
+					alert("Error: " + error.message);
+				});
+		});
+	}
+
+	// Loads teachers from API and populates the dropdown.
+	function loadTeachers() {
+		var shell = document.querySelector("main.shell[data-teachers-api]");
+		if (!shell) {
+			return;
+		}
+
+		var teachersApi = shell.getAttribute("data-teachers-api");
+		if (!teachersApi) {
+			return;
+		}
+
+		fetchJson(teachersApi)
+			.then(function (data) {
+				var teachers = data && data.teachers ? data.teachers : [];
+				populateTeacherDropdown(teachers);
+				renderTeachersList(teachers);
+			})
+			.catch(function () {
+				populateTeacherDropdown([]);
+				renderTeachersList([]);
+			});
+	}
+
+	// Populates the teacher_id dropdown with teachers.
+	function populateTeacherDropdown(teachers) {
+		var dropdown = document.getElementById("teacher_id");
+		if (!dropdown) {
+			return;
+		}
+
+		var currentValue = dropdown.value;
+		dropdown.innerHTML = '<option value="0">No Teacher Assigned</option>';
+
+		teachers.forEach(function (teacher) {
+			var option = document.createElement("option");
+			option.value = teacher.id;
+			option.textContent = teacher.name + " (" + teacher.subject + ")";
+			dropdown.appendChild(option);
+		});
+
+		dropdown.value = currentValue;
+	}
+
+	// Renders teacher list for management/deletion in the modal.
+	function renderTeachersList(teachers) {
+		var container = document.getElementById("teachers-management-list");
+		if (!container) {
+			return;
+		}
+
+		if (!teachers || !teachers.length) {
+			container.innerHTML = '<p style="color: #666;">No teachers yet.</p>';
+			return;
+		}
+
+		var html = teachers
+			.map(function (teacher) {
+				return (
+					'<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">' +
+					'<div>' +
+					'<strong>' +
+					escapeHtml(teacher.name) +
+					'</strong> - ' +
+					escapeHtml(teacher.subject) +
+					'</div>' +
+					'<div style="display: flex; gap: 4px;">' +
+					'<button type="button" class="teacher-edit-btn" data-teacher-id="' +
+					teacher.id +
+					'" style="padding: 4px 8px; font-size: 12px;">Edit</button>' +
+					'<button type="button" class="teacher-delete-btn" data-teacher-id="' +
+					teacher.id +
+					'" style="padding: 4px 8px; font-size: 12px; background-color: #dc3545; color: white;">Delete</button>' +
+					'</div>' +
+					'</div>'
+				);
+			})
+			.join("");
+
+		container.innerHTML = html;
+	}
+
+	// Opens the teacher management modal.
+	function openTeacherModal() {
+		var modal = document.getElementById("teacher-modal");
+		if (modal) {
+			modal.removeAttribute("hidden");
+			document.body.style.overflow = "hidden";
+			document.getElementById("teacher_edit_id").value = "";
+			document.getElementById("teacher_edit_name").value = "";
+			document.getElementById("teacher_edit_subject").value = "";
+			document.getElementById("teacher_edit_name").focus();
+			document.getElementById("teacher-form-submit").textContent = "Add Teacher";
+		}
+	}
+
+	// Closes the teacher management modal.
+	function closeTeacherModal() {
+		var modal = document.getElementById("teacher-modal");
+		if (modal) {
+			modal.setAttribute("hidden", "");
+			document.body.style.overflow = "";
+		}
+	}
+
+	// Initializes teacher management modal and form handlers.
+	function initTeacherModal() {
+		var modal = document.getElementById("teacher-modal");
+		var form = document.getElementById("teacher-form");
+		var closeBtn = document.getElementById("teacher-modal-close");
+		var backdrop = document.getElementById("teacher-modal-backdrop");
+		var quickAddBtn = document.getElementById("add-teacher-quick-btn");
+
+		var shell = document.querySelector("main.shell[data-teachers-api]");
+		if (!shell) {
+			return;
+		}
+
+		var teachersApi = shell.getAttribute("data-teachers-api");
+		if (!teachersApi) {
+			return;
+		}
+
+		if (quickAddBtn) {
+			quickAddBtn.addEventListener("click", openTeacherModal);
+		}
+
+		if (closeBtn) {
+			closeBtn.addEventListener("click", closeTeacherModal);
+		}
+
+		if (backdrop) {
+			backdrop.addEventListener("click", closeTeacherModal);
+		}
+
+		if (form) {
+			form.addEventListener("submit", function (e) {
+				e.preventDefault();
+
+				var teacherId = document.getElementById("teacher_edit_id").value.trim();
+				var name = document.getElementById("teacher_edit_name").value.trim();
+				var subject = document.getElementById("teacher_edit_subject").value.trim();
+
+				if (!name || !subject) {
+					alert("Teacher name and subject are required");
+					return;
+				}
+
+				var method = teacherId ? "PUT" : "POST";
+				var payload = {
+					name: name,
+					subject: subject,
+				};
+
+				if (teacherId) {
+					payload.id = parseInt(teacherId);
+				}
+
+				fetch(teachersApi, {
+					method: method,
+					credentials: "same-origin",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(payload),
+				})
+					.then(function (response) {
+						return response.json().then(function (data) {
+							if (!response.ok) {
+								throw new Error(data.error || "Failed to save teacher");
+							}
+							return data;
+						});
+					})
+					.then(function () {
+						loadTeachers();
+						closeTeacherModal();
+					})
+					.catch(function (error) {
+						alert("Error: " + error.message);
+					});
+			});
+		}
+
+		// Handle edit button clicks
+		document.addEventListener("click", function (e) {
+			if (e.target.closest(".teacher-edit-btn")) {
+				var btn = e.target.closest(".teacher-edit-btn");
+				var teacherId = btn.getAttribute("data-teacher-id");
+				if (teacherId) {
+					loadTeacherForEdit(teacherId);
+				}
+			}
+		});
+
+		// Handle delete button clicks
+		document.addEventListener("click", function (e) {
+			if (e.target.closest(".teacher-delete-btn")) {
+				var btn = e.target.closest(".teacher-delete-btn");
+				var teacherId = btn.getAttribute("data-teacher-id");
+				if (teacherId && confirm("Delete this teacher? This cannot be undone.")) {
+					deleteTeacher(teacherId, teachersApi);
+				}
+			}
+		});
+	}
+
+	// Loads a teacher's data for editing.
+	function loadTeacherForEdit(teacherId) {
+		var shell = document.querySelector("main.shell[data-teachers-api]");
+		if (!shell) {
+			return;
+		}
+
+		var teachersApi = shell.getAttribute("data-teachers-api");
+		if (!teachersApi) {
+			return;
+		}
+
+		fetchJson(teachersApi)
+			.then(function (data) {
+				var teachers = data && data.teachers ? data.teachers : [];
+				var teacher = teachers.find(function (t) {
+					return t.id == teacherId;
+				});
+
+				if (teacher) {
+					document.getElementById("teacher_edit_id").value = teacher.id;
+					document.getElementById("teacher_edit_name").value = teacher.name;
+					document.getElementById("teacher_edit_subject").value = teacher.subject;
+					document.getElementById("teacher-form-submit").textContent = "Update Teacher";
+					openTeacherModal();
+				}
+			})
+			.catch(function (error) {
+				alert("Error loading teacher: " + error.message);
+			});
+	}
+
+	// Deletes a teacher by ID.
+	function deleteTeacher(teacherId, teachersApi) {
+		fetch(teachersApi, {
+			method: "DELETE",
+			credentials: "same-origin",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ id: parseInt(teacherId) }),
+		})
+			.then(function (response) {
+				return response.json().then(function (data) {
+					if (!response.ok) {
+						throw new Error(data.error || "Failed to delete teacher");
+					}
+					return data;
+				});
+			})
+			.then(function () {
+				loadTeachers();
+			})
+			.catch(function (error) {
+				alert("Error: " + error.message);
+			});
 	}
 
 	document.addEventListener("DOMContentLoaded", function () {
@@ -883,5 +1182,7 @@
 		initDeleteStudent();
 		initEditStudentModal();
 		initAddSubjectForm();
+		initTeacherModal();
+		loadTeachers();
 	});
 })();

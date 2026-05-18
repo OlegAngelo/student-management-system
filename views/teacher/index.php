@@ -10,7 +10,8 @@
 <body>
     <main class="shell"
         data-students-api="<?= htmlspecialchars($baseUrl . '/teacher/api/students', ENT_QUOTES, 'UTF-8') ?>"
-        data-subjects-api="<?= htmlspecialchars($baseUrl . '/teacher/api/subjects', ENT_QUOTES, 'UTF-8') ?>">
+        data-subjects-api="<?= htmlspecialchars($baseUrl . '/teacher/api/subjects', ENT_QUOTES, 'UTF-8') ?>"
+        data-teachers-api="<?= htmlspecialchars($baseUrl . '/teacher/api/teachers', ENT_QUOTES, 'UTF-8') ?>">
         <h1 class="page-title">Teacher Dashboard</h1>
 
         <!-- student & subject container -->
@@ -120,9 +121,12 @@
 
                         <!-- teacher selector -->
                         <label for="teacher_id">Teacher (Optional)</label>
-                        <select id="teacher_id" name="teacher_id">
-                            <option value="0">No Teacher Assigned</option>
-                        </select>
+                        <div style="display: flex; gap: 8px; align-items: flex-end;">
+                            <select id="teacher_id" name="teacher_id" style="flex: 1;">
+                                <option value="0">No Teacher Assigned</option>
+                            </select>
+                            <button type="button" id="add-teacher-quick-btn" class="button secondary">+ Add Teacher</button>
+                        </div>
 
                         <!-- schedule time / late after: MySQL TIME columns (HH:MM:SS); HTML time value HH:MM is accepted -->
                         <label for="schedule_time">Schedule Time</label>
@@ -138,6 +142,37 @@
                             <button type="button" id="add-subject-cancel" class="button secondary">Cancel</button>
                         </div>
                     </form>
+                </div>
+
+                <!-- teacher management modal -->
+                <div id="teacher-modal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="teacher-modal-title">
+                    <button type="button" class="modal__backdrop" id="teacher-modal-backdrop" tabindex="-1" aria-label="Close dialog"></button>
+                    <div class="modal__panel modal-edit-panel">
+                        <h2 id="teacher-modal-title" class="modal-edit-panel__title">Manage Teachers</h2>
+
+                        <form id="teacher-form" class="add-student-form">
+                            <input type="hidden" id="teacher_edit_id" name="teacher_id" value="">
+
+                            <label for="teacher_edit_name">Teacher Name</label>
+                            <input type="text" id="teacher_edit_name" name="name" placeholder="Dr. John Smith" autocomplete="off" required>
+
+                            <label for="teacher_edit_subject">Subject</label>
+                            <input type="text" id="teacher_edit_subject" name="subject" placeholder="Mathematics" autocomplete="off" required>
+
+                            <div class="action-btns">
+                                <button type="submit" class="button primary" id="teacher-form-submit">Save Teacher</button>
+                                <button type="button" id="teacher-modal-close" class="button secondary">Close</button>
+                            </div>
+                        </form>
+
+                        <!-- teachers list for management -->
+                        <div id="teachers-list-container" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #ddd;">
+                            <h3 style="margin-bottom: 12px;">Existing Teachers</h3>
+                            <div id="teachers-management-list" style="max-height: 300px; overflow-y: auto;">
+                                <p style="color: #666;">Loading teachers...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="subject-schedule-toolbar" id="subject-schedule-toolbar">

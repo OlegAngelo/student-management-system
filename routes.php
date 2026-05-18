@@ -32,6 +32,12 @@
         'DELETE:/teacher/api/subjects' => [TeacherController::class, 'deleteSubject'],
         'PUT:/teacher/api/subjects' => [TeacherController::class, 'updateSubject'],
 
+        // API routes for CRUD operations on teachers
+        'GET:/teacher/api/teachers' => [TeacherController::class, 'teachersJson'],
+        'POST:/teacher/api/teachers' => [TeacherController::class, 'createTeacher'],
+        'DELETE:/teacher/api/teachers' => [TeacherController::class, 'deleteTeacher'],
+        'PUT:/teacher/api/teachers' => [TeacherController::class, 'updateTeacher'],
+
         // API routes for CRUD operations on subjects (for student dashboard)
         '/student/subjects' => [StudentController::class, 'subjectsJson'],
     ];
