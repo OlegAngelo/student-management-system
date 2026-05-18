@@ -15,14 +15,21 @@
      */
 
     return [
+        // Main pages
         '/' => [HomeController::class, 'index'],
         '/teacher' => [TeacherController::class, 'index'],
+        '/student' => [StudentController::class, 'index'],
+
+        // API routes for CRUD operations on students (for teacher dashboard)
         'GET:/teacher/api/students' => [TeacherController::class, 'studentsJson'],
         'POST:/teacher/api/students' => [TeacherController::class, 'createStudent'],
         'DELETE:/teacher/api/students' => [TeacherController::class, 'deleteStudent'],
         'PUT:/teacher/api/students' => [TeacherController::class, 'updateStudent'],
+        
+        // API routes for CRUD operations on subjects (for teacher dashboard)
         'GET:/teacher/api/subjects' => [TeacherController::class, 'subjectsJson'],
-        '/student' => [StudentController::class, 'index'],
+
+        // API routes for CRUD operations on subjects (for student dashboard)
         '/student/subjects' => [StudentController::class, 'subjectsJson'],
     ];
 ?>
