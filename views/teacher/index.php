@@ -112,9 +112,17 @@
                     <h3>Add New Subject</h3>
 
                     <form id="add-subject-form" class="add-subject-form">
+                        <input type="hidden" id="subject_id" name="subject_id" value="">
+
                         <!-- subject name -->
                         <label for="subject_name">Subject Name</label>
-                        <input type="text" id="subject_name" name="subject_name" placeholder="CPE 3222 - Web Development">
+                        <input type="text" id="subject_name" name="subject_name" placeholder="CPE 3222 - Web Development" required>
+
+                        <!-- teacher selector -->
+                        <label for="teacher_id">Teacher (Optional)</label>
+                        <select id="teacher_id" name="teacher_id">
+                            <option value="0">No Teacher Assigned</option>
+                        </select>
 
                         <!-- schedule time / late after: MySQL TIME columns (HH:MM:SS); HTML time value HH:MM is accepted -->
                         <label for="schedule_time">Schedule Time</label>

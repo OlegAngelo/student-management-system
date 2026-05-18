@@ -113,18 +113,24 @@
 				return (
 					'<article class="subject-schedule-card" role="listitem" data-subject-name="' +
 					subjectName +
+					'" data-subject-id="' +
+					row.id +
 					'">' +
 					'<div class="subject-schedule-card__top">' +
 					'<h3 class="subject-schedule-card__title">' +
 					subjectName +
 					"</h3>" +
 					'<div class="subject-schedule-card__actions">' +
-					'<button type="button" class="subject-icon-btn" aria-label="Edit ' +
+					'<button type="button" class="subject-icon-btn subject-edit-btn" data-subject-id="' +
+					row.id +
+					'" aria-label="Edit ' +
 					subjectName +
 					'">' +
 					editSvg +
 					"</button>" +
-					'<button type="button" class="subject-icon-btn student-delete-btn" aria-label="Delete ' +
+					'<button type="button" class="subject-icon-btn subject-delete-btn" data-subject-id="' +
+					row.id +
+					'" aria-label="Delete ' +
 					subjectName +
 					'">' +
 					deleteSvg +
@@ -508,8 +514,64 @@
 		if (!form) {
 			return;
 		}
+
+		var shell = document.querySelector("main.shell[data-subjects-api]");
+		if (!shell) {
+			return;
+		}
+
+		var subjectsApi = shell.getAttribute("data-subjects-api");
+		if (!subjectsApi) {
+			return;
+		}
+
 		form.addEventListener("submit", function (e) {
 			e.preventDefault();
+
+			var subjectId = document.getElementById("subject_id").value.trim();
+			var subjectName = document.getElementById("subject_name").value.trim();
+			var teacherId = parseInt(document.getElementById("teacher_id").value) || 0;
+			var scheduleTime = document.getElementById("schedule_time").value.trim();
+			var lateAfterTime = document.getElementById("late_after_time").value.trim();
+
+			if (!subjectName || !scheduleTime || !lateAfterTime) {
+				alert("Subject name, schedule time, and late after time are required");
+				return;
+			}
+
+			var method = subjectId ? "PUT" : "POST";
+			var payload = {
+				subject_name: subjectName,
+				teacher_id: teacherId,
+				schedule_time: scheduleTime,
+				late_after_time: lateAfterTime,
+			};
+
+			if (subjectId) {
+				payload.id = parseInt(subjectId);
+			}
+
+			fetch(subjectsApi, {
+				method: method,
+				credentials: "same-origin",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload),
+			})
+				.then(function (response) {
+					return response.json().then(function (data) {
+						if (!response.ok) {
+							throw new Error(data.error || "Failed to save subject");
+						}
+						return data;
+					});
+				})
+				.then(function () {
+					hideAddSubjectForm();
+					initTeacherDashboardApiData();
+				})
+				.catch(function (error) {
+					alert("Error: " + error.message);
+				});
 		});
 	}
 
@@ -693,7 +755,106 @@
 		}
 	}
 
-	document.addEventListener("DOMContentLoaded", function () {
+	// Handles edit/delete button clicks on subject cards via event delegation.
+	function initSubjectCardActions() {
+		var subjectList = document.getElementById("subject-schedule-list");
+		if (!subjectList) {
+			return;
+		}
+
+		var shell = document.querySelector("main.shell[data-subjects-api]");
+		if (!shell) {
+			return;
+		}
+
+		var subjectsApi = shell.getAttribute("data-subjects-api");
+		if (!subjectsApi) {
+			return;
+		}
+
+		// Handle edit button
+		subjectList.addEventListener("click", function (e) {
+			var btn = e.target.closest(".subject-edit-btn");
+			if (!btn || !subjectList.contains(btn)) {
+				return;
+			}
+
+			var subjectId = btn.getAttribute("data-subject-id");
+			if (!subjectId) {
+				return;
+			}
+
+			// Fetch subject data and populate form
+			fetch(subjectsApi, { credentials: "same-origin" })
+				.then(function (r) {
+					if (!r.ok) throw new Error("Failed to fetch subjects");
+					return r.json();
+				})
+				.then(function (data) {
+					var subjects = data.subjects || [];
+					var subject = subjects.find(function (s) {
+						return s.id == subjectId;
+					});
+
+					if (!subject) {
+						alert("Subject not found");
+						return;
+					}
+
+					// Populate form with subject data
+					document.getElementById("subject_id").value = subject.id;
+					document.getElementById("subject_name").value = subject.subject_name;
+					document.getElementById("teacher_id").value = subject.teacher_id;
+					document.getElementById("schedule_time").value = subject.schedule_time;
+					document.getElementById("late_after_time").value = subject.late_after_time;
+
+					// Show form
+					showAddSubjectForm();
+				})
+				.catch(function (error) {
+					alert("Error: " + error.message);
+				});
+		});
+
+		// Handle delete button
+		subjectList.addEventListener("click", function (e) {
+			var btn = e.target.closest(".subject-delete-btn");
+			if (!btn || !subjectList.contains(btn)) {
+				return;
+			}
+
+			var subjectId = btn.getAttribute("data-subject-id");
+			if (!subjectId) {
+				return;
+			}
+
+			if (!confirm("Delete this subject? This cannot be undone.")) {
+				return;
+			}
+
+			fetch(subjectsApi, {
+				method: "DELETE",
+				credentials: "same-origin",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ id: parseInt(subjectId) }),
+			})
+				.then(function (response) {
+					return response.json().then(function (data) {
+						if (!response.ok) {
+							throw new Error(data.error || "Failed to delete subject");
+						}
+						return data;
+					});
+				})
+				.then(function () {
+					alert("Subject deleted successfully.");
+					initTeacherDashboardApiData();
+				})
+				.catch(function (error) {
+					alert("Error: " + error.message);
+				});
+		});
+	}
 		var toggleBtn = document.getElementById("add-student-toggle");
 		var cancelBtn = document.getElementById("add-student-cancel");
 		if (toggleBtn) {
