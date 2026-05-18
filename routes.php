@@ -28,6 +28,9 @@
         
         // API routes for CRUD operations on subjects (for teacher dashboard)
         'GET:/teacher/api/subjects' => [TeacherController::class, 'subjectsJson'],
+        'POST:/teacher/api/subjects' => [TeacherController::class, 'createSubject'],
+        'DELETE:/teacher/api/subjects' => [TeacherController::class, 'deleteSubject'],
+        'PUT:/teacher/api/subjects' => [TeacherController::class, 'updateSubject'],
 
         // API routes for CRUD operations on subjects (for student dashboard)
         '/student/subjects' => [StudentController::class, 'subjectsJson'],
