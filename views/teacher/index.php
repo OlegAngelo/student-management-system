@@ -104,7 +104,7 @@
             <!-- Teachers & Their Schedules -->
             <section class="card">
                 <div class="card-header">
-                    <h2>Teachers and Their Schedules</h2>
+                    <h2>Teacher and Schedule List</h2>
                     <button type="button" id="open-teacher-modal-btn" class="button primary"> + Add/Manage Teachers</button>
                 </div>
 
