@@ -39,33 +39,6 @@
         }
 
         /**
-         * JSON list of subjects for the teacher dashboard.
-         */
-        public function subjectsJson(string $baseUrl): void
-        {
-            header('Content-Type: application/json; charset=utf-8');
-
-            $subjectModel = new Subject();
-            $rows = $subjectModel->all();
-
-            $subjects = array_map(
-                static function (array $row): array {
-                    return [
-                        'id' => (int) ($row['id'] ?? 0),
-                        'subject_name' => (string) ($row['subject_name'] ?? ''),
-                        'teacher_id' => (int) ($row['teacher_id'] ?? 0),
-                        'teacher_name' => (string) ($row['teacher_name'] ?? ''),
-                        'schedule_time' => (string) ($row['schedule_time'] ?? ''),
-                        'late_after_time' => (string) ($row['late_after_time'] ?? ''),
-                    ];
-                },
-                $rows
-            );
-
-            echo json_encode(['subjects' => $subjects], JSON_UNESCAPED_UNICODE);
-        }
-
-        /**
          * Creates a new student from POST JSON data.
          */
         public function createStudent(string $baseUrl): void
@@ -163,5 +136,128 @@
                 echo json_encode(['success' => false, 'error' => 'Failed to update student.'], JSON_UNESCAPED_UNICODE);
             }
         }
-    }
+
+        /**
+         * JSON list of subjects for the teacher dashboard.
+         */
+        public function subjectsJson(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $subjectModel = new Subject();
+            $rows = $subjectModel->all();
+
+            $subjects = array_map(
+                static function (array $row): array {
+                    return [
+                        'id' => (int) ($row['id'] ?? 0),
+                        'subject_name' => (string) ($row['subject_name'] ?? ''),
+                        'teacher_id' => (int) ($row['teacher_id'] ?? 0),
+                        'teacher_name' => (string) ($row['teacher_name'] ?? ''),
+                        'schedule_time' => (string) ($row['schedule_time'] ?? ''),
+                        'late_after_time' => (string) ($row['late_after_time'] ?? ''),
+                    ];
+                },
+                $rows
+            );
+
+            echo json_encode(['subjects' => $subjects], JSON_UNESCAPED_UNICODE);
+        }
+
+
+        /**
+         * Creates a new subject from POST JSON data.
+         */
+        public function createSubject(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+
+            $subjectName = trim($input['subject_name'] ?? '');
+            $teacherId = (int) ($input['teacher_id'] ?? 0);
+            $scheduleTime = trim($input['schedule_time'] ?? '');
+            $lateAfterTime = trim($input['late_after_time'] ?? '');
+
+            if (!$subjectName || !$scheduleTime || !$lateAfterTime) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Subject name, schedule time, and late after time are required'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $subjectModel = new Subject();
+            try {
+                $ok = $subjectModel->create($subjectName, $teacherId, $scheduleTime, $lateAfterTime);
+            } catch (\Exception $e) {
+                $ok = false;
+            }
+
+            if ($ok) {
+                http_response_code(201);
+                echo json_encode(['success' => true, 'message' => 'Subject created successfully.', 'data' => ['subject_name' => $subjectName, 'teacher_id' => $teacherId, 'schedule_time' => $scheduleTime, 'late_after_time' => $lateAfterTime]], JSON_UNESCAPED_UNICODE);
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Failed to create subject (duplicate or database error)'], JSON_UNESCAPED_UNICODE);
+            }
+        }
+
+        /**
+         * Updates a subject from PUT JSON data.
+         */
+        public function updateSubject(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+            $id = (int) ($input['id'] ?? 0);
+            $subjectName = trim($input['subject_name'] ?? '');
+            $teacherId = (int) ($input['teacher_id'] ?? 0);
+            $scheduleTime = trim($input['schedule_time'] ?? '');
+            $lateAfterTime = trim($input['late_after_time'] ?? '');
+
+            if (!$id || !$subjectName || !$scheduleTime || !$lateAfterTime) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'ID, subject name, schedule time, and late after time are required'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $subjectModel = new Subject();
+            $ok = $subjectModel->updateById($id, $subjectName, $teacherId, $scheduleTime, $lateAfterTime);
+
+            if ($ok) {
+                echo json_encode(['success' => true, 'message' => 'Subject updated successfully.'], JSON_UNESCAPED_UNICODE);
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Failed to update subject.'], JSON_UNESCAPED_UNICODE);
+            }
+        }
+
+        /**
+         * Deletes a subject from DELETE JSON data.
+         */
+        public function deleteSubject(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+            $id = (int) ($input['id'] ?? 0);
+
+            if (!$id) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Subject ID is required'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $subjectModel = new Subject();
+            $ok = $subjectModel->deleteById($id);
+
+            if ($ok) {
+                echo json_encode(['success' => true, 'message' => 'Subject deleted successfully.'], JSON_UNESCAPED_UNICODE);
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Failed to delete subject.'], JSON_UNESCAPED_UNICODE);
+            }
+        }
 ?>
