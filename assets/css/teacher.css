@@ -351,6 +351,15 @@
     border-radius: 8px;
     overflow: hidden;
     background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-qr-panel__figure canvas {
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
 
 .modal-qr-panel__qr-img {

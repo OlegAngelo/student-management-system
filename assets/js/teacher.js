@@ -333,33 +333,31 @@
 			// Clear previous QR code
 			if (containerEl) {
 				containerEl.innerHTML = "";
-			}
-
-			// Create canvas element for QR code
-			var canvas = document.createElement("canvas");
-			canvas.id = "student-qr-canvas";
-			canvas.style.display = "block";
-			canvas.style.margin = "0 auto";
-
-			if (containerEl) {
-				containerEl.appendChild(canvas);
+				containerEl.style.display = "flex";
+				containerEl.style.alignItems = "center";
+				containerEl.style.justifyContent = "center";
 			}
 
 			try {
-				// Generate QR code with the student ID
-				var qr = new QRCode(canvas, {
+				// QRCode library generates canvas inside the container
+				var qr = new QRCode(containerEl, {
 					text: "student-management:" + studentId,
-					width: 260,
-					height: 260,
+					width: 220,
+					height: 220,
 					colorDark: "#000000",
 					colorLight: "#ffffff",
 					correctLevel: QRCode.CorrectLevel.H,
 				});
 
-				currentQRCanvas = canvas;
+				// Get the canvas that was created by QRCode
+				var canvas = containerEl.querySelector("canvas");
+				if (canvas) {
+					currentQRCanvas = canvas;
+				}
 			} catch (e) {
+				console.error("QR Code generation error:", e);
 				if (containerEl) {
-					containerEl.innerHTML = '<p style="color: red;">Failed to generate QR code</p>';
+					containerEl.innerHTML = '<p style="color: red;">Failed to generate QR code: ' + e.message + '</p>';
 				}
 			}
 		}
