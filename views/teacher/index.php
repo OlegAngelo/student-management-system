@@ -154,19 +154,13 @@
         <button type="button" class="modal__backdrop" id="student-qr-modal-backdrop" tabindex="-1" aria-label="Close dialog"></button>
         <div class="modal__panel modal-qr-panel">
             <h2 id="student-qr-modal-title" class="modal-qr-panel__title">QR Code for</h2>
-            <div class="modal-qr-panel__figure">
-                <img
-                    id="student-qr-modal-img"
-                    class="modal-qr-panel__qr-img"
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&amp;margin=8&amp;data=student-management%3Apreview"
-                    width="280"
-                    height="280"
-                    alt=""
-                    decoding="async"
-                    referrerpolicy="no-referrer-when-downgrade"
-                >
+            <div class="modal-qr-panel__figure" id="student-qr-modal-container">
+                <!-- QR code will be generated here -->
             </div>
-            <button type="button" class="modal-qr-panel__close" id="student-qr-modal-close">Close</button>
+            <div class="modal-qr-panel__actions">
+                <button type="button" class="button primary" id="student-qr-modal-download">Download QR</button>
+                <button type="button" class="button secondary" id="student-qr-modal-close">Close</button>
+            </div>
         </div>
     </div>
 
@@ -204,6 +198,8 @@
     </div>
 
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-row-helpers.js') ?>"></script>
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher.js') ?>"></script>
 </body>
 </html>

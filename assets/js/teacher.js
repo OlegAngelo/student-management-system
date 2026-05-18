@@ -319,33 +319,82 @@
 		}
 
 		var titleEl = document.getElementById("student-qr-modal-title");
-		var imgEl = document.getElementById("student-qr-modal-img");
+		var containerEl = document.getElementById("student-qr-modal-container");
 		var closeBtn = document.getElementById("student-qr-modal-close");
+		var downloadBtn = document.getElementById("student-qr-modal-download");
 		var backdrop = document.getElementById("student-qr-modal-backdrop");
 		var studentList = document.getElementById("student-list");
 
-		/** Public QR image endpoint; swap for self-hosted generation later. Docs: https://goqr.me/api/doc/create-qr-code/ */
-		var qrImageBase =
-			"https://api.qrserver.com/v1/create-qr-code/?size=280x280&margin=8&data=";
-		var qrPreviewPayload = "student-management:preview";
+		var currentStudentId = null;
+		var currentQRCanvas = null;
 
-		// Returns the goqr.me image URL for a given QR payload string.
-		function qrImageUrlForPayload(payload) {
-			return qrImageBase + encodeURIComponent(payload);
+		// Generates QR code and displays it in the modal.
+		function generateAndDisplayQR(studentId) {
+			// Clear previous QR code
+			if (containerEl) {
+				containerEl.innerHTML = "";
+				containerEl.style.display = "flex";
+				containerEl.style.alignItems = "center";
+				containerEl.style.justifyContent = "center";
+			}
+
+			try {
+				// QRCode library generates canvas inside the container
+				var qr = new QRCode(containerEl, {
+					text: "Record attendance for " + studentId,
+					width: 220,
+					height: 220,
+					colorDark: "#000000",
+					colorLight: "#ffffff",
+					correctLevel: QRCode.CorrectLevel.H,
+				});
+
+				// Get the canvas that was created by QRCode
+				var canvas = containerEl.querySelector("canvas");
+				if (canvas) {
+					currentQRCanvas = canvas;
+				}
+			} catch (e) {
+				console.error("QR Code generation error:", e);
+				if (containerEl) {
+					containerEl.innerHTML =
+						'<p style="color: red;">Failed to generate QR code: ' +
+						e.message +
+						". Kindly contact your administrator.</p>";
+				}
+			}
 		}
 
-		// Shows the modal, sets title/image from studentId, and locks body scroll.
+		// Downloads the QR code as a PNG file.
+		function downloadQR() {
+			if (!currentQRCanvas) {
+				alert("QR code not generated");
+				return;
+			}
+
+			// Convert canvas to blob and download
+			currentQRCanvas.toBlob(function (blob) {
+				var url = URL.createObjectURL(blob);
+				var link = document.createElement("a");
+				link.href = url;
+				link.download = "qr-" + currentStudentId + ".png";
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				URL.revokeObjectURL(url);
+			}, "image/png");
+		}
+
+		// Shows the modal and generates QR code.
 		function openModal(studentId) {
+			currentStudentId = studentId;
+
 			if (titleEl) {
 				titleEl.textContent = "QR Code for " + studentId;
 			}
-			if (imgEl) {
-				var payload = studentId
-					? "student-management:" + studentId
-					: qrPreviewPayload;
-				imgEl.alt = "QR code for student " + (studentId || "preview");
-				imgEl.src = qrImageUrlForPayload(payload);
-			}
+
+			generateAndDisplayQR(studentId);
+
 			modal.removeAttribute("hidden");
 			document.body.style.overflow = "hidden";
 			if (closeBtn) {
@@ -353,17 +402,15 @@
 			}
 		}
 
-		// Hides the modal, restores scroll, and resets the image to the preview.
+		// Hides the modal and restores scroll.
 		function closeModal() {
 			modal.setAttribute("hidden", "");
 			document.body.style.overflow = "";
-			if (imgEl) {
-				imgEl.src = qrImageUrlForPayload(qrPreviewPayload);
-				imgEl.alt = "";
-			}
+			currentStudentId = null;
+			currentQRCanvas = null;
 		}
 
-		// Closes the modal when Escape is pressed while it is open.
+		// Closes the modal when Escape is pressed.
 		function onKeydown(e) {
 			if (e.key === "Escape" && !modal.hasAttribute("hidden")) {
 				closeModal();
@@ -382,9 +429,14 @@
 			});
 		}
 
+		if (downloadBtn) {
+			downloadBtn.addEventListener("click", downloadQR);
+		}
+
 		if (closeBtn) {
 			closeBtn.addEventListener("click", closeModal);
 		}
+
 		if (backdrop) {
 			backdrop.addEventListener("click", closeModal);
 		}
@@ -541,10 +593,17 @@
 		// Fills the form fields, shows the modal, and locks body scroll.
 		function openModal(btn) {
 			var row = btn.closest("tr");
-			document.getElementById("edit_student_id").value = btn.getAttribute("data-student-id") || "";
-			document.getElementById("edit_name").value = row ? (row.getAttribute("data-name") || "") : "";
-			document.getElementById("edit_year").value = row ? (row.getAttribute("data-year") || "") : "";
-			document.getElementById("edit_section").value = row ? (row.getAttribute("data-section") || "") : "";
+			document.getElementById("edit_student_id").value =
+				btn.getAttribute("data-student-id") || "";
+			document.getElementById("edit_name").value = row
+				? row.getAttribute("data-name") || ""
+				: "";
+			document.getElementById("edit_year").value = row
+				? row.getAttribute("data-year") || ""
+				: "";
+			document.getElementById("edit_section").value = row
+				? row.getAttribute("data-section") || ""
+				: "";
 			modal.removeAttribute("hidden");
 			document.body.style.overflow = "hidden";
 			document.getElementById("edit_name").focus();
