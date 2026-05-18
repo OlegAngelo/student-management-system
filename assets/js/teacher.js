@@ -341,7 +341,7 @@
 			try {
 				// QRCode library generates canvas inside the container
 				var qr = new QRCode(containerEl, {
-					text: "student-management:" + studentId,
+					text: "Record attendance for " + studentId,
 					width: 220,
 					height: 220,
 					colorDark: "#000000",
@@ -357,7 +357,10 @@
 			} catch (e) {
 				console.error("QR Code generation error:", e);
 				if (containerEl) {
-					containerEl.innerHTML = '<p style="color: red;">Failed to generate QR code: ' + e.message + '</p>';
+					containerEl.innerHTML =
+						'<p style="color: red;">Failed to generate QR code: ' +
+						e.message +
+						". Kindly contact your administrator.</p>";
 				}
 			}
 		}
@@ -590,10 +593,17 @@
 		// Fills the form fields, shows the modal, and locks body scroll.
 		function openModal(btn) {
 			var row = btn.closest("tr");
-			document.getElementById("edit_student_id").value = btn.getAttribute("data-student-id") || "";
-			document.getElementById("edit_name").value = row ? (row.getAttribute("data-name") || "") : "";
-			document.getElementById("edit_year").value = row ? (row.getAttribute("data-year") || "") : "";
-			document.getElementById("edit_section").value = row ? (row.getAttribute("data-section") || "") : "";
+			document.getElementById("edit_student_id").value =
+				btn.getAttribute("data-student-id") || "";
+			document.getElementById("edit_name").value = row
+				? row.getAttribute("data-name") || ""
+				: "";
+			document.getElementById("edit_year").value = row
+				? row.getAttribute("data-year") || ""
+				: "";
+			document.getElementById("edit_section").value = row
+				? row.getAttribute("data-section") || ""
+				: "";
 			modal.removeAttribute("hidden");
 			document.body.style.overflow = "hidden";
 			document.getElementById("edit_name").focus();
