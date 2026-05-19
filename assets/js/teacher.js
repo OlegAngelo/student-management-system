@@ -1,40 +1,14 @@
 (function () {
 	"use strict";
 
-	// Fetches JSON from an API endpoint and rejects non-OK responses.
-	function fetchJson(url) {
-		return fetch(url, { credentials: "same-origin" }).then(function (response) {
-			if (!response.ok) {
-				throw new Error("bad status");
-			}
-			return response.json();
-		});
-	}
-
 	// Reveals the add-student panel and focuses its first field.
 	function showAddStudentForm() {
-		var panel = document.getElementById("add-student-panel");
-		if (!panel) {
-			return;
-		}
-		panel.removeAttribute("hidden");
-		var first = panel.querySelector("input, select, textarea");
-		if (first) {
-			first.focus();
-		}
+		window.UIHelpers.showForm("add-student-panel");
 	}
 
 	// Hides the add-student panel and resets its form.
 	function hideAddStudentForm() {
-		var panel = document.getElementById("add-student-panel");
-		if (!panel) {
-			return;
-		}
-		panel.setAttribute("hidden", "");
-		var form = panel.querySelector("form");
-		if (form) {
-			form.reset();
-		}
+		window.UIHelpers.hideForm("add-student-panel", "add-student-form");
 	}
 
 	// Renders student rows from API data into the teacher table body.
@@ -70,7 +44,7 @@
 			return;
 		}
 
-		fetchJson(studentsApi)
+		window.ApiClient.get(studentsApi)
 			.then(function (data) {
 				var rows = data && data.students ? data.students : [];
 				renderStudentRows(rows);
@@ -79,7 +53,8 @@
 					sortEl.dispatchEvent(new Event("change", { bubbles: true }));
 				}
 			})
-			.catch(function () {
+			.catch(function (error) {
+				window.ApiClient.handleError(error);
 				renderStudentRows([]);
 			});
 	}
@@ -241,17 +216,11 @@
 			}
 
 			generateAndDisplayQR(studentId);
-
-			modal.removeAttribute("hidden");
-			document.body.style.overflow = "hidden";
-			if (closeBtn) {
-				closeBtn.focus();
-			}
+			window.UIHelpers.openModal("student-qr-modal", closeBtn);
 		}
 
 		function closeModal() {
-			modal.setAttribute("hidden", "");
-			document.body.style.overflow = "";
+			window.UIHelpers.closeModal("student-qr-modal");
 			currentStudentId = null;
 			currentQRCanvas = null;
 		}
@@ -317,32 +286,19 @@
 				return;
 			}
 
-			fetch(studentsApi, {
-				method: "POST",
-				credentials: "same-origin",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					student_id: studentId,
-					name: name,
-					year: year,
-					section: section,
-				}),
+			window.ApiClient.post(studentsApi, {
+				student_id: studentId,
+				name: name,
+				year: year,
+				section: section,
 			})
-				.then(function (response) {
-					return response.json().then(function (data) {
-						if (!response.ok) {
-							throw new Error(data.error || "Failed to create student");
-						}
-						return data;
-					});
-				})
 				.then(function () {
 					hideAddStudentForm();
-					alert("Student added successfully.");
+					window.UIHelpers.showSuccess("Student added successfully.");
 					initTeacherDashboardApiData();
 				})
 				.catch(function (error) {
-					alert("Error: " + error.message);
+					window.ApiClient.handleError(error);
 				});
 		});
 	}
@@ -378,7 +334,7 @@
 				return;
 			}
 
-			fetch(studentsApi, {
+			window.ApiClient.put(studentsApi, {
 				method: "DELETE",
 				credentials: "same-origin",
 				headers: { "Content-Type": "application/json" },
@@ -489,7 +445,7 @@
 					return;
 				}
 
-				fetch(studentsApi, {
+				window.ApiClient.put(studentsApi, {
 					method: "PUT",
 					credentials: "same-origin",
 					headers: { "Content-Type": "application/json" },
@@ -536,7 +492,7 @@
 			return;
 		}
 
-		Promise.all([fetchJson(teachersApi), fetchJson(subjectsApi)])
+		Promise.all([window.ApiClient.get(teachersApi), window.ApiClient.get(subjectsApi)])
 			.then(function (results) {
 				var teachersData = results[0];
 				var subjectsData = results[1];
@@ -771,7 +727,7 @@
 			return;
 		}
 
-		fetchJson(subjectsApi)
+		window.ApiClient.get(subjectsApi)
 			.then(function (data) {
 				var subjects = data && data.subjects ? data.subjects : [];
 				var subject = subjects.find(function (s) {
@@ -814,7 +770,7 @@
 			return;
 		}
 
-		fetch(subjectsApi, {
+		window.ApiClient.delete(subjectsApi, {
 			method: "DELETE",
 			credentials: "same-origin",
 			headers: { "Content-Type": "application/json" },
@@ -902,7 +858,7 @@
 			payload.id = parseInt(subjectId);
 		}
 
-		fetch(subjectsApi, {
+		window.ApiClient.delete(subjectsApi, {
 			method: method,
 			credentials: "same-origin",
 			headers: { "Content-Type": "application/json" },
@@ -938,7 +894,7 @@
 			return;
 		}
 
-		fetchJson(teachersApi)
+		window.ApiClient.get(teachersApi)
 			.then(function (data) {
 				var teachers = data && data.teachers ? data.teachers : [];
 				renderTeachersInModal(teachers);
@@ -981,24 +937,18 @@
 	}
 
 	function openTeacherModal() {
-		var modal = document.getElementById("teacher-modal");
-		if (modal) {
-			modal.removeAttribute("hidden");
-			document.body.style.overflow = "hidden";
-			document.getElementById("teacher_edit_id").value = "";
-			document.getElementById("teacher_edit_name").value = "";
-			document.getElementById("teacher_edit_department").value = "";
-			document.getElementById("teacher_edit_name").focus();
-			document.getElementById("teacher-form-submit").textContent = "Add Teacher";
-		}
+		document.getElementById("teacher_edit_id").value = "";
+		document.getElementById("teacher_edit_name").value = "";
+		document.getElementById("teacher_edit_department").value = "";
+		window.UIHelpers.openModal(
+			"teacher-modal",
+			document.getElementById("teacher_edit_name")
+		);
+		document.getElementById("teacher-form-submit").textContent = "Add Teacher";
 	}
 
 	function closeTeacherModal() {
-		var modal = document.getElementById("teacher-modal");
-		if (modal) {
-			modal.setAttribute("hidden", "");
-			document.body.style.overflow = "";
-		}
+		window.UIHelpers.closeModal("teacher-modal");
 	}
 
 	function initTeacherModal() {
@@ -1050,7 +1000,7 @@
 					payload.id = parseInt(teacherId);
 				}
 
-				fetch(teachersApi, {
+				window.ApiClient.delete(teachersApi, {
 					method: method,
 					credentials: "same-origin",
 					headers: { "Content-Type": "application/json" },
@@ -1106,7 +1056,7 @@
 			return;
 		}
 
-		fetchJson(teachersApi)
+		window.ApiClient.get(teachersApi)
 			.then(function (data) {
 				var teachers = data && data.teachers ? data.teachers : [];
 				var teacher = teachers.find(function (t) {
@@ -1129,7 +1079,7 @@
 	}
 
 	function deleteTeacher(teacherId, teachersApi) {
-		fetch(teachersApi, {
+		window.ApiClient.delete(teachersApi, {
 			method: "DELETE",
 			credentials: "same-origin",
 			headers: { "Content-Type": "application/json" },

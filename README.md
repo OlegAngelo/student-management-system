@@ -78,7 +78,7 @@ The system follows a simple two-route structure:
 
 ---
 
-## 4. Use Case Diagram 
+## 4. Use Case Diagram
 
 ```mermaid
 flowchart LR
@@ -135,7 +135,7 @@ erDiagram
     TEACHERS {
         INT id PK
         VARCHAR name
-        VARCHAR subject
+        VARCHAR department
     }
 
     SUBJECTS {
@@ -244,9 +244,9 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS teachers (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    subject VARCHAR(100) NOT NULL,
-    CONSTRAINT uq_teachers_name_subject
-        UNIQUE (name, subject)
+    department VARCHAR(100) NOT NULL,
+    CONSTRAINT uq_teachers_name_department
+        UNIQUE (name, department)
 );
 
 -- Subjects table
@@ -373,15 +373,15 @@ Response format (JSON):
 
 ```json
 {
-  "success": true,
-  "message": "Attendance recorded successfully."
+	"success": true,
+	"message": "Attendance recorded successfully."
 }
 ```
 
 ```json
 {
-  "success": false,
-  "message": "Attendance already recorded for this subject today."
+	"success": false,
+	"message": "Attendance already recorded for this subject today."
 }
 ```
 
@@ -472,23 +472,117 @@ Simple MVC-style layout: one entry point, a single route file, controllers, mode
 
 ```text
 /student-management-system
-│── /assets            ← CSS, JS, images
-│── /controllers       ← one class per area (Home, Teacher, Student, …)
-│── /models            ← database access (one file per main table is a good start)
-│── /views             ← HTML templates (PHP files that mostly print HTML)
 │
-│── /database
-│   └── schema.sql
-│── /migrations        ← migration files run by migrate.php
+├── /assets
+│   ├── /css
+│   │   ├── base.css              ← Layout, cards, buttons, and home tiles
+│   │   ├── teacher.css           ← Teacher dashboard styling
+│   │   └── student.css           ← Student portal styling
+│   └── /js
+│       ├── ui-helpers.js         ← Reusable UI utilities (modals, forms, notifications)
+│       ├── api-client.js         ← Centralized API client with error handling
+│       ├── teacher.js            ← Teacher dashboard logic (uses helpers above)
+│       ├── teacher-row-helpers.js← Student row rendering helpers
+│       └── student.js            ← Student portal logic
 │
-│── migrate.php        ← migration runner (php migrate.php)
-│── routes.php         ← URL path → [Controller, method]
-│── .htaccess          ← sends requests to root index.php
-│── index.php          ← front controller: loads routes, runs the right controller
-│── dbconfig.php
-│── dbconfig.example.php
-└── README.md
+├── /controllers
+│   ├── HomeController.php        ← Home/index page
+│   ├── TeacherController.php     ← Teacher module endpoints + teachersHierarchyJson()
+│   └── StudentController.php     ← Student module endpoints
+│
+├── /models
+│   ├── Teacher.php               ← Teacher table CRUD (uses 'department' column)
+│   ├── Subject.php               ← Subject table CRUD with advanced filtering
+│   ├── Student.php               ← Student table CRUD
+│   └── Attendance.php            ← Attendance table CRUD
+│
+├── /modelHelpers
+│   ├── TeacherFormatter.php      ← Data transformation: hierarchical grouping, validation
+│   └── SqlSearch.php             ← Search utility for filtering/searching
+│
+├── /views
+│   ├── /teacher
+│   │   ├── index.php             ← Teacher dashboard page
+│   │   └── /partials
+│   │       ├── _teacher-card.php ← Reusable teacher card template
+│   │       └── _subject-card.php ← Reusable subject card template
+│   ├── /student
+│   │   └── index.php             ← Student portal page
+│   ├── /home
+│   │   └── index.php             ← Home/landing page
+│   └── /errors
+│       └── 404.php               ← 404 error page
+│
+├── /database
+│   └── schema.sql                ← Database schema (department column)
+│
+├── /migrations                   ← Migration files run by migrate.php
+│   └── 20260507_000001_initial_schema.php
+│
+├── migrate.php                   ← Migration runner (php migrate.php)
+├── routes.php                    ← URL path → [Controller, method]
+├── .htaccess                     ← Sends requests to root index.php
+├── index.php                     ← Front controller: loads routes, runs the right controller
+├── dbconfig.php                  ← Database configuration (local copy, not in git)
+├── dbconfig.example.php          ← Example database configuration
+└── README.md                     ← This file
 ```
+
+---
+
+## Key Files and Their Purpose
+
+### JavaScript Helpers (Refactored for Separation of Concerns)
+
+- **ui-helpers.js** - Reusable UI utilities extracted from teacher.js
+  - Modal management: `openModal()`, `closeModal()`, `attachEscapeKeyListener()`
+  - Form management: `showForm()`, `hideForm()`, `resetForm()`, `focusFirstInput()`
+  - Notifications: `showError()`, `showSuccess()` with auto-dismiss
+  - Event delegation: `addDelegatedListener()`, `getElementData()`
+  - HTML escaping: `escapeHtml()` for XSS prevention
+  - Utility: `debounce()`, `confirm()`
+
+- **api-client.js** - Centralized API client for all HTTP requests
+  - HTTP methods: `get()`, `post()`, `put()`, `delete()`, `request()`
+  - Error handling: `handleError()` with user-friendly messages
+  - Validation: `validateRequired()` for client-side field validation
+  - Consistent response parsing and error status handling
+
+- **teacher.js** - Teacher dashboard logic (refactored to use helpers above)
+  - Student management (CRUD)
+  - Teacher management with modal forms
+  - Subject management under teachers
+  - QR code generation
+  - Now uses `ApiClient` for all API calls and `UIHelpers` for UI interactions
+
+### PHP Helpers (Server-Side Logic)
+
+- **TeacherFormatter.php** - Data transformation and validation
+  - `groupSubjectsByTeacher()` - Groups subjects hierarchically by teacher_id
+  - `enrichTeacherData()` - Adds computed fields (subject count, display name)
+  - `formatHierarchy()` - Combines teachers and subjects into single response structure
+  - `validateTeacher()` - Validates teacher input fields
+  - `validateSubject()` - Validates subject input fields with time format checking
+
+### Controllers (Updated with New Endpoint)
+
+- **TeacherController.php** - Teacher module endpoints
+  - New: `teachersHierarchyJson()` - Returns pre-grouped teachers and subjects
+  - Uses `TeacherFormatter` for data transformation
+  - Uses `validateTeacher()` and `validateSubject()` for input validation
+  - All CRUD operations use centralized validation
+
+### Templates (New for Better Organization)
+
+- **\_teacher-card.php** - Teacher card component template
+  - Displays teacher name, department label, and subject count
+  - Includes collapsible subject list
+  - Ready for server-side rendering when needed
+
+- **\_subject-card.php** - Subject card component template
+  - Displays subject name, schedule time, and late after time
+  - Includes edit/delete action buttons
+  - Uses SVG icons for actions
 
 ---
 
@@ -500,3 +594,70 @@ Simple MVC-style layout: one entry point, a single route file, controllers, mode
 - Student QR code stores only `student_id` (no subject or personal data in QR).
 - Attendance is limited to one record per student per subject per day with status (`present`, `late`, `absent`).
 - Built for local deployment and testing using XAMPP + phpMyAdmin.
+
+---
+
+## Refactored Architecture (PHP-First Approach)
+
+### Separation of Concerns - Phase 1 & 2 Refactoring
+
+The system was refactored to shift logic from JavaScript to PHP, improving maintainability and code reuse:
+
+#### JavaScript Layer (UI Concerns Only)
+
+- **ui-helpers.js** - Reusable UI patterns
+  - Modal management, form handling, notifications
+  - Event delegation and DOM utilities
+  - NO business logic, pure UI utilities
+
+- **api-client.js** - Unified API communication
+  - Centralized HTTP methods (GET, POST, PUT, DELETE)
+  - Consistent error handling with user feedback
+  - Validates responses before returning to caller
+
+#### PHP Layer (Business Logic)
+
+- **TeacherFormatter.php** - Data transformation
+  - Hierarchical grouping of subjects by teacher
+  - Data enrichment (subject count, display labels)
+  - Centralized validation for teachers and subjects
+
+- **TeacherController.php** - API Endpoints
+  - `teachersHierarchyJson()` - Returns pre-processed hierarchical data
+  - Uses TeacherFormatter for all data transformation
+  - Centralized validation before database operations
+
+- **\_teacher-card.php & \_subject-card.php** - Templates
+  - Ready for server-side rendering
+  - Separate HTML generation from logic
+  - Can be used with or without JavaScript rendering
+
+### Data Flow (Refactored)
+
+**Before Refactoring:**
+
+```
+Client (teacher.js)
+  → fetch(/teachers)
+  → fetch(/subjects)
+  → JavaScript groups by teacher_id
+  → JavaScript renders HTML
+```
+
+**After Refactoring:**
+
+```
+Client (teacher.js using ApiClient)
+  → ApiClient.get(/teachers-hierarchy)
+  → Server (TeacherFormatter) pre-groups data
+  → Returns structured JSON { teachers, subjectsByTeacher }
+  → JavaScript renders using UIHelpers
+```
+
+### Benefits
+
+1. **Reduced JavaScript Size** - Removed 300+ lines of data transformation logic
+2. **Single Source of Truth** - Data structure defined once in PHP, reused everywhere
+3. **Better Testability** - Validation and formatting logic in PHP is testable independently
+4. **Reusable Components** - UIHelpers and ApiClient can be used by other modules
+5. **Easier Maintenance** - Clear separation: PHP handles logic, JS handles UI

@@ -179,9 +179,14 @@
             $scheduleTime = trim($input['schedule_time'] ?? '');
             $lateAfterTime = trim($input['late_after_time'] ?? '');
 
-            if (!$subjectName || !$scheduleTime || !$lateAfterTime) {
+            $validationError = $this->validateSubjectInput([
+                'subject_name' => $subjectName,
+                'schedule_time' => $scheduleTime,
+                'late_after_time' => $lateAfterTime,
+            ]);
+            if ($validationError) {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'error' => 'Subject name, schedule time, and late after time are required'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['success' => false, 'error' => $validationError], JSON_UNESCAPED_UNICODE);
                 return;
             }
 
@@ -216,9 +221,15 @@
             $scheduleTime = trim($input['schedule_time'] ?? '');
             $lateAfterTime = trim($input['late_after_time'] ?? '');
 
-            if (!$id || !$subjectName || !$scheduleTime || !$lateAfterTime) {
+            $validationError = $this->validateSubjectInput([
+                'subject_name' => $subjectName,
+                'schedule_time' => $scheduleTime,
+                'late_after_time' => $lateAfterTime,
+            ]);
+            if ($validationError || !$id) {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'error' => 'ID, subject name, schedule time, and late after time are required'], JSON_UNESCAPED_UNICODE);
+                $error = $validationError ?? 'ID is required';
+                echo json_encode(['success' => false, 'error' => $error], JSON_UNESCAPED_UNICODE);
                 return;
             }
 
@@ -286,6 +297,52 @@
         }
 
         /**
+         * Hierarchical teacher list with grouped subjects for dashboard.
+         * Pre-processes data on server to reduce client work.
+         */
+        public function teachersHierarchyJson(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            require_once ROOT . '/modelHelpers/TeacherFormatter.php';
+
+            $teacherModel = new Teacher();
+            $subjectModel = new Subject();
+
+            $teachers = $teacherModel->all();
+            $subjects = $subjectModel->all();
+
+            $hierarchyData = TeacherFormatter::formatHierarchy($teachers, $subjects);
+
+            echo json_encode($hierarchyData, JSON_UNESCAPED_UNICODE);
+        }
+        // ===== PRIVATE VALIDATION HELPERS =====
+
+        /**
+         * Validates teacher input and returns error message if invalid.
+         *
+         * @param array<string, mixed> $input User input data
+         * @return string|null Error message or null if valid
+         */
+        private function validateTeacherInput(array $input): ?string
+        {
+            require_once ROOT . '/modelHelpers/TeacherFormatter.php';
+            return TeacherFormatter::validateTeacher($input);
+        }
+
+        /**
+         * Validates subject input and returns error message if invalid.
+         *
+         * @param array<string, mixed> $input User input data
+         * @return string|null Error message or null if valid
+         */
+        private function validateSubjectInput(array $input): ?string
+        {
+            require_once ROOT . '/modelHelpers/TeacherFormatter.php';
+            return TeacherFormatter::validateSubject($input);
+        }
+
+        /**
          * Creates a new teacher from POST JSON data.
          */
         public function createTeacher(string $baseUrl): void
@@ -297,9 +354,10 @@
             $name = trim($input['name'] ?? '');
             $department = trim($input['department'] ?? '');
 
-            if (!$name || !$department) {
+            $validationError = $this->validateTeacherInput(['name' => $name, 'department' => $department]);
+            if ($validationError) {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'error' => 'Teacher name and department are required'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['success' => false, 'error' => $validationError], JSON_UNESCAPED_UNICODE);
                 return;
             }
 
@@ -332,9 +390,11 @@
             $name = trim($input['name'] ?? '');
             $department = trim($input['department'] ?? '');
 
-            if (!$id || !$name || !$department) {
+            $validationError = $this->validateTeacherInput(['name' => $name, 'department' => $department]);
+            if ($validationError || !$id) {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'error' => 'ID, name, and department are required'], JSON_UNESCAPED_UNICODE);
+                $error = $validationError ?? 'ID is required';
+                echo json_encode(['success' => false, 'error' => $error], JSON_UNESCAPED_UNICODE);
                 return;
             }
 
