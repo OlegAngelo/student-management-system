@@ -491,7 +491,7 @@ Simple MVC-style layout: one entry point, a single route file, controllers, mode
 │   └── StudentController.php     ← Student module endpoints
 │
 ├── /models
-│   ├── Teacher.php               ← Teacher table CRUD (uses 'department' column)
+│   ├── Teacher.php               ← Teacher table CRUD
 │   ├── Subject.php               ← Subject table CRUD with advanced filtering
 │   ├── Student.php               ← Student table CRUD
 │   └── Attendance.php            ← Attendance table CRUD
@@ -525,7 +525,7 @@ Simple MVC-style layout: one entry point, a single route file, controllers, mode
 ├── index.php                     ← Front controller: loads routes, runs the right controller
 ├── dbconfig.php                  ← Database configuration (local copy, not in git)
 ├── dbconfig.example.php          ← Example database configuration
-└── README.md                     ← This file
+└── README.md                     ← Project documentation
 ```
 
 ---
