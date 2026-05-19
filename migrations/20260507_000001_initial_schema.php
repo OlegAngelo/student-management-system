@@ -25,9 +25,9 @@
             CREATE TABLE IF NOT EXISTS teachers (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
-                subject VARCHAR(100) NOT NULL,
-                CONSTRAINT uq_teachers_name_subject
-                    UNIQUE (name, subject)
+                department VARCHAR(100) NOT NULL,
+                CONSTRAINT uq_teachers_name_department
+                    UNIQUE (name, department)
             )
         ";
 

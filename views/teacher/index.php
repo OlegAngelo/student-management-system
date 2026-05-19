@@ -127,10 +127,10 @@
                     <input type="hidden" id="teacher_edit_id" name="teacher_id" value="">
 
                     <label for="teacher_edit_name">Teacher Name</label>
-                    <input type="text" id="teacher_edit_name" name="name" placeholder="Dr. John Smith" autocomplete="off" required>
+                    <input type="text" id="teacher_edit_name" name="name" placeholder="Dr. Angelo Balagtas" autocomplete="off" required>
 
-                    <label for="teacher_edit_subject">Subject</label>
-                    <input type="text" id="teacher_edit_subject" name="subject" placeholder="Mathematics" autocomplete="off" required>
+                    <label for="teacher_edit_department">Department</label>
+                    <input type="text" id="teacher_edit_department" name="department" placeholder="Computer Engineering" autocomplete="off" required>
 
                     <div class="action-btns">
                         <button type="submit" class="button primary" id="teacher-form-submit">Save Teacher</button>

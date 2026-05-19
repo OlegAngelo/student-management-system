@@ -276,7 +276,7 @@
                     return [
                         'id' => (int) ($row['id'] ?? 0),
                         'name' => (string) ($row['name'] ?? ''),
-                        'subject' => (string) ($row['subject'] ?? ''),
+                        'department' => (string) ($row['department'] ?? ''),
                     ];
                 },
                 $rows
@@ -295,17 +295,17 @@
             $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 
             $name = trim($input['name'] ?? '');
-            $subject = trim($input['subject'] ?? '');
+            $department = trim($input['department'] ?? '');
 
-            if (!$name || !$subject) {
+            if (!$name || !$department) {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'error' => 'Teacher name and subject are required'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['success' => false, 'error' => 'Teacher name and department are required'], JSON_UNESCAPED_UNICODE);
                 return;
             }
 
             $teacherModel = new Teacher();
             try {
-                $ok = $teacherModel->create($name, $subject);
+                $ok = $teacherModel->create($name, $department);
             } catch (\Exception $e) {
                 $ok = false;
             }
@@ -330,16 +330,16 @@
 
             $id = (int) ($input['id'] ?? 0);
             $name = trim($input['name'] ?? '');
-            $subject = trim($input['subject'] ?? '');
+            $department = trim($input['department'] ?? '');
 
-            if (!$id || !$name || !$subject) {
+            if (!$id || !$name || !$department) {
                 http_response_code(400);
-                echo json_encode(['success' => false, 'error' => 'ID, name, and subject are required'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['success' => false, 'error' => 'ID, name, and department are required'], JSON_UNESCAPED_UNICODE);
                 return;
             }
 
             $teacherModel = new Teacher();
-            $ok = $teacherModel->updateById($id, $name, $subject);
+            $ok = $teacherModel->updateById($id, $name, $department);
 
             if ($ok) {
                 echo json_encode(['success' => true, 'message' => 'Teacher updated successfully.'], JSON_UNESCAPED_UNICODE);
