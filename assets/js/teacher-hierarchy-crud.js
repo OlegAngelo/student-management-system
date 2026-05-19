@@ -1,7 +1,7 @@
 /**
  * Teacher Hierarchy CRUD Module
  * Handles add, edit, delete operations for teachers and subjects
- * Dependencies: api-client.js, ui-helpers.js
+ * Dependencies: api-client.js, ui-helpers.js, teacher-row-helper.js
  */
 window.TeacherHierarchyCRUD = (function () {
 	"use strict";
@@ -80,21 +80,9 @@ window.TeacherHierarchyCRUD = (function () {
 			return;
 		}
 
-		window.ApiClient.delete(subjectsApi, {
-			method: "DELETE",
-			credentials: "same-origin",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ id: parseInt(subjectId) }),
-		})
-			.then(function (response) {
-				return response.json().then(function (data) {
-					if (!response.ok) {
-						throw new Error(data.error || "Failed to delete subject");
-					}
-					return data;
-				});
-			})
+		window.ApiClient.delete(subjectsApi, { id: parseInt(subjectId) })
 			.then(function () {
+				alert("Subject deleted successfully.");
 				window.TeacherHierarchy.reload();
 			})
 			.catch(function (error) {
@@ -156,7 +144,6 @@ window.TeacherHierarchyCRUD = (function () {
 			return;
 		}
 
-		var method = subjectId ? "PUT" : "POST";
 		var payload = {
 			subject_name: subjectName,
 			teacher_id: teacherId,
@@ -164,26 +151,22 @@ window.TeacherHierarchyCRUD = (function () {
 			late_after_time: lateAfterTime,
 		};
 
+		var apiRequest;
 		if (subjectId) {
 			payload.id = parseInt(subjectId);
+			apiRequest = window.ApiClient.put(subjectsApi, payload);
+		} else {
+			apiRequest = window.ApiClient.post(subjectsApi, payload);
 		}
 
-		window.ApiClient.delete(subjectsApi, {
-			method: method,
-			credentials: "same-origin",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(payload),
-		})
-			.then(function (response) {
-				return response.json().then(function (data) {
-					if (!response.ok) {
-						throw new Error(data.error || "Failed to save subject");
-					}
-					return data;
-				});
-			})
+		apiRequest
 			.then(function () {
 				window.TeacherHierarchy.hideSubjectForm(teacherId);
+				alert(
+					subjectId
+						? "Subject updated successfully."
+						: "Subject added successfully.",
+				);
 				window.TeacherHierarchy.reload();
 			})
 			.catch(function (error) {
@@ -283,21 +266,9 @@ window.TeacherHierarchyCRUD = (function () {
 	}
 
 	function deleteTeacher(teacherId, teachersApi) {
-		window.ApiClient.delete(teachersApi, {
-			method: "DELETE",
-			credentials: "same-origin",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ id: parseInt(teacherId) }),
-		})
-			.then(function (response) {
-				return response.json().then(function (data) {
-					if (!response.ok) {
-						throw new Error(data.error || "Failed to delete teacher");
-					}
-					return data;
-				});
-			})
+		window.ApiClient.delete(teachersApi, { id: parseInt(teacherId) })
 			.then(function () {
+				alert("Teacher deleted successfully.");
 				loadTeachers();
 			})
 			.catch(function (error) {
@@ -344,33 +315,28 @@ window.TeacherHierarchyCRUD = (function () {
 					return;
 				}
 
-				var method = teacherId ? "PUT" : "POST";
 				var payload = {
 					name: name,
 					department: department,
 				};
 
+				var apiRequest;
 				if (teacherId) {
 					payload.id = parseInt(teacherId);
+					apiRequest = window.ApiClient.put(teachersApi, payload);
+				} else {
+					apiRequest = window.ApiClient.post(teachersApi, payload);
 				}
 
-				window.ApiClient.delete(teachersApi, {
-					method: method,
-					credentials: "same-origin",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(payload),
-				})
-					.then(function (response) {
-						return response.json().then(function (data) {
-							if (!response.ok) {
-								throw new Error(data.error || "Failed to save teacher");
-							}
-							return data;
-						});
-					})
+				apiRequest
 					.then(function () {
 						loadTeachers();
 						closeTeacherModal();
+						alert(
+							teacherId
+								? "Teacher updated successfully."
+								: "Teacher added successfully.",
+						);
 					})
 					.catch(function (error) {
 						alert("Error: " + error.message);

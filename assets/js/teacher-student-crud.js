@@ -48,7 +48,7 @@ window.TeacherStudentCRUD = (() => {
 			})
 				.then(() => {
 					hideAddStudentForm();
-					window.UIHelpers.showSuccess("Student added successfully.");
+					alert("Student added successfully.");
 					window.TeacherDashboard.reload();
 				})
 				.catch((error) => window.ApiClient.handleError(error));
@@ -74,20 +74,7 @@ window.TeacherStudentCRUD = (() => {
 
 			if (!confirm(`Delete student ${studentId}? This cannot be undone.`)) return;
 
-			window.ApiClient.delete(studentsApi, {
-				method: "DELETE",
-				credentials: "same-origin",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ id: studentId }),
-			})
-				.then((response) =>
-					response.json().then((data) => {
-						if (!response.ok) {
-							throw new Error(data.error || "Failed to delete student");
-						}
-						return data;
-					}),
-				)
+			window.ApiClient.delete(studentsApi, { student_id: studentId })
 				.then(() => {
 					alert("Student deleted successfully.");
 					window.TeacherDashboard.reload();
@@ -169,19 +156,11 @@ window.TeacherStudentCRUD = (() => {
 				}
 
 				window.ApiClient.put(studentsApi, {
-					method: "PUT",
-					credentials: "same-origin",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ student_id: studentId, name, year, section }),
+					student_id: studentId,
+					name,
+					year,
+					section,
 				})
-					.then((response) =>
-						response.json().then((data) => {
-							if (!response.ok) {
-								throw new Error(data.error || "Failed to update student");
-							}
-							return data;
-						}),
-					)
 					.then(() => {
 						closeEditModal();
 						alert("Student updated successfully.");

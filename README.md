@@ -537,7 +537,6 @@ Simple MVC-style layout: one entry point, a single route file, controllers, mode
 - **ui-helpers.js** - Reusable UI utilities extracted from teacher.js
   - Modal management: `openModal()`, `closeModal()`, `attachEscapeKeyListener()`
   - Form management: `showForm()`, `hideForm()`, `resetForm()`, `focusFirstInput()`
-  - Notifications: `showError()`, `showSuccess()` with auto-dismiss
   - Event delegation: `addDelegatedListener()`, `getElementData()`
   - HTML escaping: `escapeHtml()` for XSS prevention
   - Utility: `debounce()`, `confirm()`
