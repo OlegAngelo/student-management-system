@@ -240,7 +240,7 @@ window.TeacherHierarchyCRUD = (function () {
 		document.getElementById("teacher_edit_department").value = "";
 		window.UIHelpers.openModal(
 			"teacher-modal",
-			document.getElementById("teacher_edit_name")
+			document.getElementById("teacher_edit_name"),
 		);
 		document.getElementById("teacher-form-submit").textContent = "Add Teacher";
 	}
@@ -411,6 +411,6 @@ window.TeacherHierarchyCRUD = (function () {
 		},
 		attachSubjectFormHandlers: function () {
 			attachSubjectFormHandlers();
-		}
+		},
 	};
 })();

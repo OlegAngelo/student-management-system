@@ -1,15 +1,23 @@
 /**
  * Teacher Student QR Module
- * Handles QR code generation, display, and download
+ * Handles QR code generation, display, and download for students
  * Dependencies: ui-helpers.js
+ * @module TeacherStudentQR
  */
-window.TeacherStudentQR = (function () {
+
+window.TeacherStudentQR = (() => {
 	"use strict";
 
-	var currentStudentId = null;
-	var currentQRCanvas = null;
+	let currentStudentId = null;
+	let currentQRCanvas = null;
 
-	function generateAndDisplayQR(containerEl, studentId) {
+	/**
+	 * Generate and display QR code
+	 * @param {HTMLElement} containerEl - Container for QR code
+	 * @param {string} studentId - Student identifier
+	 * @returns {void}
+	 */
+	const generateAndDisplayQR = (containerEl, studentId) => {
 		if (containerEl) {
 			containerEl.innerHTML = "";
 			containerEl.style.display = "flex";
@@ -18,8 +26,9 @@ window.TeacherStudentQR = (function () {
 		}
 
 		try {
-			var qr = new QRCode(containerEl, {
-				text: "Record attendance for " + studentId,
+			// QRCode library (global)
+			const qr = new QRCode(containerEl, {
+				text: `Record attendance for ${studentId}`,
 				width: 220,
 				height: 220,
 				colorDark: "#000000",
@@ -27,93 +36,109 @@ window.TeacherStudentQR = (function () {
 				correctLevel: QRCode.CorrectLevel.H,
 			});
 
-			var canvas = containerEl.querySelector("canvas");
+			const canvas = containerEl?.querySelector("canvas");
 			if (canvas) {
 				currentQRCanvas = canvas;
 			}
-		} catch (e) {
-			console.error("QR Code generation error:", e);
+		} catch (error) {
+			console.error("QR Code generation error:", error);
 			if (containerEl) {
 				containerEl.innerHTML = `
 					<p class="error-message">
-						Failed to generate QR code: ${e.message}.
+						Failed to generate QR code: ${error.message}.
 						Kindly contact your administrator.
 					</p>
 				`;
 			}
 		}
-	}
+	};
 
-	function downloadQR() {
+	/**
+	 * Download QR code as PNG image
+	 * @returns {void}
+	 */
+	const downloadQR = () => {
 		if (!currentQRCanvas) {
 			alert("QR code not generated");
 			return;
 		}
 
-		currentQRCanvas.toBlob(function (blob) {
-			var url = URL.createObjectURL(blob);
-			var link = document.createElement("a");
+		currentQRCanvas.toBlob((blob) => {
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement("a");
 			link.href = url;
-			link.download = "qr-" + currentStudentId + ".png";
+			link.download = `qr-${currentStudentId}.png`;
 			document.body.appendChild(link);
 			link.click();
 			document.body.removeChild(link);
 			URL.revokeObjectURL(url);
 		}, "image/png");
-	}
+	};
 
-	function openModal(studentId) {
-		var titleEl = document.getElementById("student-qr-modal-title");
-		var containerEl = document.getElementById("student-qr-modal-container");
-		var closeBtn = document.getElementById("student-qr-modal-close");
+	/**
+	 * Open QR modal for student
+	 * @param {string} studentId - Student identifier
+	 * @returns {void}
+	 */
+	const openModal = (studentId) => {
+		const titleEl = document.getElementById("student-qr-modal-title");
+		const containerEl = document.getElementById("student-qr-modal-container");
+		const closeBtn = document.getElementById("student-qr-modal-close");
 
 		currentStudentId = studentId;
 
 		if (titleEl) {
-			titleEl.textContent = "QR Code for " + studentId;
+			titleEl.textContent = `QR Code for ${studentId}`;
 		}
 
 		generateAndDisplayQR(containerEl, studentId);
 		window.UIHelpers.openModal("student-qr-modal", closeBtn);
-	}
+	};
 
-	function closeModal() {
+	/**
+	 * Close QR modal and cleanup
+	 * @returns {void}
+	 */
+	const closeModal = () => {
 		window.UIHelpers.closeModal("student-qr-modal");
 		currentStudentId = null;
 		currentQRCanvas = null;
-	}
+	};
 
-	function onKeydown(e) {
-		var modal = document.getElementById("student-qr-modal");
-		if (e.key === "Escape" && modal && !modal.hasAttribute("hidden")) {
+	/**
+	 * Handle Escape key to close modal
+	 * @param {KeyboardEvent} event - Keyboard event
+	 * @returns {void}
+	 */
+	const onKeydown = (event) => {
+		const modal = document.getElementById("student-qr-modal");
+		if (event.key === "Escape" && modal && !modal.hasAttribute("hidden")) {
 			closeModal();
 		}
-	}
+	};
 
 	// Public API
-	return {
-		init: function () {
-			var modal = document.getElementById("student-qr-modal");
-			var downloadBtn = document.getElementById("student-qr-modal-download");
-			var closeBtn = document.getElementById("student-qr-modal-close");
-			var backdrop = document.getElementById("student-qr-modal-backdrop");
-			var studentList = document.getElementById("student-list");
+	return Object.freeze({
+		init: () => {
+			const modal = document.getElementById("student-qr-modal");
+			const downloadBtn = document.getElementById("student-qr-modal-download");
+			const closeBtn = document.getElementById("student-qr-modal-close");
+			const backdrop = document.getElementById("student-qr-modal-backdrop");
+			const studentList = document.getElementById("student-list");
 
-			if (!modal) {
-				return;
-			}
+			if (!modal) return;
 
+			// Wire QR button click handler
 			if (studentList) {
-				studentList.addEventListener("click", function (e) {
-					var btn = e.target.closest(".student-qr-open-btn");
-					if (!btn || !studentList.contains(btn)) {
-						return;
+				studentList.addEventListener("click", (event) => {
+					const btn = event.target.closest(".student-qr-open-btn");
+					if (btn?.dataset.studentId) {
+						openModal(btn.dataset.studentId);
 					}
-					var sid = btn.getAttribute("data-student-id") || "";
-					openModal(sid);
 				});
 			}
 
+			// Wire action buttons
 			if (downloadBtn) {
 				downloadBtn.addEventListener("click", downloadQR);
 			}
@@ -126,7 +151,8 @@ window.TeacherStudentQR = (function () {
 				backdrop.addEventListener("click", closeModal);
 			}
 
+			// Wire keyboard escape
 			document.addEventListener("keydown", onKeydown);
-		}
-	};
+		},
+	});
 })();

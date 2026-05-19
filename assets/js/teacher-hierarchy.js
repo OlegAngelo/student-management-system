@@ -2,158 +2,143 @@
  * Teacher Hierarchy Module
  * Handles loading and rendering teacher/subject hierarchy
  * Dependencies: api-client.js, teacher-row-helpers.js
+ * @module TeacherHierarchy
  */
-window.TeacherHierarchy = (function () {
+
+window.TeacherHierarchy = (() => {
 	"use strict";
 
-	function renderTeachersList(teachers, subjectsByTeacher) {
-		var container = document.getElementById("teachers-list-container");
-		if (!container || !teachers) {
-			return;
-		}
+	/**
+	 * Render teacher cards with hierarchy
+	 * @param {Array} teachers - Teacher list
+	 * @param {Object} subjectsByTeacher - Subjects grouped by teacher ID
+	 * @returns {void}
+	 */
+	const renderTeachersList = (teachers, subjectsByTeacher) => {
+		const container = document.getElementById("teachers-list-container");
+		if (!container || !teachers) return;
 
 		if (!teachers.length) {
-			container.innerHTML =
-				'<div class="empty-state"><p>No teachers yet. Click the "+ Add/Manage Teachers" button to add one.</p></div>';
+			container.innerHTML = `<div class="empty-state"><p>No teachers yet. Click the "+ Add/Manage Teachers" button to add one.</p></div>`;
 			return;
 		}
 
-		var html = teachers
-			.map(function (teacher) {
-				return buildTeacherCard(teacher, subjectsByTeacher);
-			})
+		const html = teachers
+			.map((teacher) => buildTeacherCard(teacher, subjectsByTeacher))
 			.join("");
 
 		container.innerHTML = html;
 
-		document.querySelectorAll(".teacher-card-header").forEach(function (header) {
-			header.addEventListener("click", function () {
-				var card = header.closest(".teacher-card");
-				if (card) {
-					toggleTeacherCard(card);
-				}
+		document.querySelectorAll(".teacher-card-header").forEach((header) => {
+			header.addEventListener("click", () => {
+				const card = header.closest(".teacher-card");
+				if (card) toggleTeacherCard(card);
 			});
 		});
 
-		document.querySelectorAll(".add-subject-btn").forEach(function (btn) {
-			btn.addEventListener("click", function () {
-				var teacherId = btn.getAttribute("data-teacher-id");
-				if (teacherId) {
-					attachSubjectToTeacher(teacherId);
-				}
+		document.querySelectorAll(".add-subject-btn").forEach((btn) => {
+			btn.addEventListener("click", () => {
+				const teacherId = btn.getAttribute("data-teacher-id");
+				if (teacherId) attachSubjectToTeacher(teacherId);
 			});
 		});
 
 		window.TeacherHierarchyCRUD.attachSubjectActions();
 		window.TeacherHierarchyCRUD.attachSubjectFormHandlers();
-	}
+	};
 
-	function toggleTeacherCard(cardElement) {
-		var header = cardElement.querySelector(".teacher-card-header");
-		var content = cardElement.querySelector(".teacher-card-content");
-		var triangle = cardElement.querySelector(".disclosure-triangle");
+	/**
+	 * Toggle teacher card expansion state
+	 * @param {HTMLElement} cardElement - Teacher card element
+	 * @returns {void}
+	 */
+	const toggleTeacherCard = (cardElement) => {
+		const header = cardElement.querySelector(".teacher-card-header");
+		const content = cardElement.querySelector(".teacher-card-content");
+		const triangle = cardElement.querySelector(".disclosure-triangle");
 
-		if (!header || !content) {
-			return;
-		}
+		if (!header || !content) return;
 
-		var isExpanded = content.style.display !== "none";
+		const isExpanded = content.style.display !== "none";
 
 		if (isExpanded) {
 			content.style.display = "none";
-			if (triangle) {
-				triangle.style.transform = "rotate(0deg)";
-			}
+			if (triangle) triangle.style.transform = "rotate(0deg)";
 		} else {
 			content.style.display = "block";
-			if (triangle) {
-				triangle.style.transform = "rotate(90deg)";
-			}
+			if (triangle) triangle.style.transform = "rotate(90deg)";
 		}
-	}
+	};
 
-	function attachSubjectToTeacher(teacherId) {
-		var card = document.querySelector(
-			'.teacher-card[data-teacher-id="' + teacherId + '"]',
-		);
-		if (!card) {
-			return;
-		}
+	/**
+	 * Show subject form for teacher
+	 * @param {string} teacherId - Teacher identifier
+	 * @returns {void}
+	 */
+	const attachSubjectToTeacher = (teacherId) => {
+		const card = document.querySelector(`.teacher-card[data-teacher-id="${teacherId}"]`);
+		if (!card) return;
 
-		var formContainer = card.querySelector(".add-subject-form-container");
-		var btn = card.querySelector(".add-subject-btn");
-		if (!formContainer) {
-			return;
-		}
+		const formContainer = card.querySelector(".add-subject-form-container");
+		const btn = card.querySelector(".add-subject-btn");
+		if (!formContainer) return;
 
 		formContainer.style.display = "block";
-		var form = formContainer.querySelector("form");
-		if (form) {
-			var firstInput = form.querySelector("input[name='subject_name']");
-			if (firstInput) {
-				firstInput.focus();
-			}
-		}
+		const form = formContainer.querySelector("form");
+		const firstInput = form?.querySelector("input[name='subject_name']");
+		firstInput?.focus();
 
-		if (btn) {
-			btn.style.display = "none";
-		}
-	}
+		if (btn) btn.style.display = "none";
+	};
 
-	function hideSubjectFormForTeacher(teacherId) {
-		var card = document.querySelector(
-			'.teacher-card[data-teacher-id="' + teacherId + '"]',
-		);
-		if (!card) {
-			return;
-		}
+	/**
+	 * Hide subject form for teacher
+	 * @param {string} teacherId - Teacher identifier
+	 * @returns {void}
+	 */
+	const hideSubjectFormForTeacher = (teacherId) => {
+		const card = document.querySelector(`.teacher-card[data-teacher-id="${teacherId}"]`);
+		if (!card) return;
 
-		var formContainer = card.querySelector(".add-subject-form-container");
-		var btn = card.querySelector(".add-subject-btn");
-		if (!formContainer) {
-			return;
-		}
+		const formContainer = card.querySelector(".add-subject-form-container");
+		const btn = card.querySelector(".add-subject-btn");
+		if (!formContainer) return;
 
 		formContainer.style.display = "none";
-		var form = formContainer.querySelector("form");
-		if (form) {
-			form.reset();
-		}
+		const form = formContainer.querySelector("form");
+		if (form) form.reset();
 
-		if (btn) {
-			btn.style.display = "block";
-		}
-	}
+		if (btn) btn.style.display = "block";
+	};
 
-	function loadTeachersWithSubjects() {
-		var shell = document.querySelector(
+	/**
+	 * Load teachers and subjects from API
+	 * @returns {void}
+	 */
+	const loadTeachersWithSubjects = () => {
+		const shell = document.querySelector(
 			"main.shell[data-teachers-api][data-subjects-api]",
 		);
-		if (!shell) {
-			return;
-		}
+		if (!shell) return;
 
-		var teachersApi = shell.getAttribute("data-teachers-api");
-		var subjectsApi = shell.getAttribute("data-subjects-api");
-		if (!teachersApi || !subjectsApi) {
-			return;
-		}
+		const teachersApi = shell.getAttribute("data-teachers-api");
+		const subjectsApi = shell.getAttribute("data-subjects-api");
+		if (!teachersApi || !subjectsApi) return;
 
-		Promise.all([window.ApiClient.get(teachersApi), window.ApiClient.get(subjectsApi)])
-			.then(function (results) {
-				var teachersData = results[0];
-				var subjectsData = results[1];
-				var teachers =
-					teachersData && teachersData.teachers ? teachersData.teachers : [];
-				var subjects =
-					subjectsData && subjectsData.subjects ? subjectsData.subjects : [];
+		Promise.all([
+			window.ApiClient.get(teachersApi),
+			window.ApiClient.get(subjectsApi),
+		])
+			.then(([teachersData, subjectsData]) => {
+				const teachers = teachersData?.teachers ?? [];
+				const subjects = subjectsData?.subjects ?? [];
 
-				var subjectsByTeacher = {};
-				teachers.forEach(function (teacher) {
+				const subjectsByTeacher = {};
+				teachers.forEach((teacher) => {
 					subjectsByTeacher[teacher.id] = [];
 				});
 
-				subjects.forEach(function (subject) {
+				subjects.forEach((subject) => {
 					if (subjectsByTeacher[subject.teacher_id]) {
 						subjectsByTeacher[subject.teacher_id].push(subject);
 					}
@@ -161,21 +146,21 @@ window.TeacherHierarchy = (function () {
 
 				renderTeachersList(teachers, subjectsByTeacher);
 			})
-			.catch(function () {
+			.catch(() => {
 				renderTeachersList([], {});
 			});
-	}
+	};
 
 	// Public API
-	return {
-		init: function () {
+	return Object.freeze({
+		init: () => {
 			loadTeachersWithSubjects();
 		},
-		reload: function () {
+		reload: () => {
 			loadTeachersWithSubjects();
 		},
-		hideSubjectForm: function (teacherId) {
+		hideSubjectForm: (teacherId) => {
 			hideSubjectFormForTeacher(teacherId);
-		}
-	};
+		},
+	});
 })();

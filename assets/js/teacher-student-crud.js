@@ -1,42 +1,39 @@
 /**
  * Teacher Student CRUD Module
  * Handles add, edit, and delete student operations
- * Dependencies: api-client.js, ui-helpers.js
+ * Dependencies: api-client.js, ui-helpers.js, teacher-dashboard.js
+ * @module TeacherStudentCRUD
  */
-window.TeacherStudentCRUD = (function () {
+
+window.TeacherStudentCRUD = (() => {
 	"use strict";
 
-	function showAddStudentForm() {
+	const showAddStudentForm = () =>
 		window.UIHelpers.showForm("add-student-panel");
-	}
 
-	function hideAddStudentForm() {
+	const hideAddStudentForm = () => {
 		window.UIHelpers.hideForm("add-student-panel", "add-student-form");
-	}
+	};
 
-	function initAddStudentForm() {
-		var form = document.getElementById("add-student-form");
-		if (!form) {
-			return;
-		}
+	/**
+	 * Initialize add student form handler
+	 * @returns {void}
+	 */
+	const initAddStudentForm = () => {
+		const form = document.getElementById("add-student-form");
+		if (!form) return;
 
-		var shell = document.querySelector("main.shell[data-students-api]");
-		if (!shell) {
-			return;
-		}
+		const shell = document.querySelector("main.shell[data-students-api]");
+		const studentsApi = shell?.getAttribute("data-students-api");
+		if (!studentsApi) return;
 
-		var studentsApi = shell.getAttribute("data-students-api");
-		if (!studentsApi) {
-			return;
-		}
+		form.addEventListener("submit", (event) => {
+			event.preventDefault();
 
-		form.addEventListener("submit", function (e) {
-			e.preventDefault();
-
-			var studentId = document.getElementById("student_id").value.trim();
-			var name = document.getElementById("name").value.trim();
-			var year = document.getElementById("year").value.trim();
-			var section = document.getElementById("section").value.trim();
+			const studentId = document.getElementById("student_id").value.trim();
+			const name = document.getElementById("name").value.trim();
+			const year = document.getElementById("year").value.trim();
+			const section = document.getElementById("section").value.trim();
 
 			if (!studentId || !name || !year || !section) {
 				alert("All fields are required");
@@ -45,157 +42,126 @@ window.TeacherStudentCRUD = (function () {
 
 			window.ApiClient.post(studentsApi, {
 				student_id: studentId,
-				name: name,
-				year: year,
-				section: section,
+				name,
+				year,
+				section,
 			})
-				.then(function () {
+				.then(() => {
 					hideAddStudentForm();
 					window.UIHelpers.showSuccess("Student added successfully.");
 					window.TeacherDashboard.reload();
 				})
-				.catch(function (error) {
-					window.ApiClient.handleError(error);
-				});
+				.catch((error) => window.ApiClient.handleError(error));
 		});
-	}
+	};
 
-	function initDeleteStudent() {
-		var studentList = document.getElementById("student-list");
-		if (!studentList) {
-			return;
-		}
+	/**
+	 * Initialize delete student handler
+	 * @returns {void}
+	 */
+	const initDeleteStudent = () => {
+		const studentList = document.getElementById("student-list");
+		const shell = document.querySelector("main.shell[data-students-api]");
+		const studentsApi = shell?.getAttribute("data-students-api");
 
-		var shell = document.querySelector("main.shell[data-students-api]");
-		if (!shell) {
-			return;
-		}
+		if (!studentList || !studentsApi) return;
 
-		var studentsApi = shell.getAttribute("data-students-api");
-		if (!studentsApi) {
-			return;
-		}
+		studentList.addEventListener("click", (event) => {
+			const btn = event.target.closest(".student-delete-btn");
+			const studentId = btn?.getAttribute("data-student-id");
 
-		studentList.addEventListener("click", function (e) {
-			var btn = e.target.closest(".student-delete-btn");
-			if (!btn || !studentList.contains(btn)) {
-				return;
-			}
+			if (!studentId || !studentList.contains(btn)) return;
 
-			var studentId = btn.getAttribute("data-student-id") || "";
-			if (!studentId) {
-				return;
-			}
+			if (!confirm(`Delete student ${studentId}? This cannot be undone.`)) return;
 
-			if (!confirm("Delete student " + studentId + "? This cannot be undone.")) {
-				return;
-			}
-
-			window.ApiClient.put(studentsApi, {
+			window.ApiClient.delete(studentsApi, {
 				method: "DELETE",
 				credentials: "same-origin",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ id: studentId }),
 			})
-				.then(function (response) {
-					return response.json().then(function (data) {
+				.then((response) =>
+					response.json().then((data) => {
 						if (!response.ok) {
 							throw new Error(data.error || "Failed to delete student");
 						}
 						return data;
-					});
-				})
-				.then(function () {
+					}),
+				)
+				.then(() => {
 					alert("Student deleted successfully.");
 					window.TeacherDashboard.reload();
 				})
-				.catch(function (error) {
-					alert("Error: " + error.message);
-				});
+				.catch((error) => alert(`Error: ${error.message}`));
 		});
-	}
+	};
 
-	function initEditStudentModal() {
-		var modal = document.getElementById("student-edit-modal");
-		if (!modal) {
-			return;
-		}
+	/**
+	 * Initialize edit student modal
+	 * @returns {void}
+	 */
+	const initEditStudentModal = () => {
+		const modal = document.getElementById("student-edit-modal");
+		const closeBtn = document.getElementById("student-edit-modal-close");
+		const backdrop = document.getElementById("student-edit-modal-backdrop");
+		const studentList = document.getElementById("student-list");
+		const shell = document.querySelector("main.shell[data-students-api]");
+		const studentsApi = shell?.getAttribute("data-students-api");
 
-		var closeBtn = document.getElementById("student-edit-modal-close");
-		var backdrop = document.getElementById("student-edit-modal-backdrop");
-		var studentList = document.getElementById("student-list");
+		if (!modal || !studentsApi) return;
 
-		var shell = document.querySelector("main.shell[data-students-api]");
-		if (!shell) {
-			return;
-		}
-
-		var studentsApi = shell.getAttribute("data-students-api");
-		if (!studentsApi) {
-			return;
-		}
-
-		function openModal(btn) {
-			var row = btn.closest("tr");
+		const openModal = (btn) => {
+			const row = btn.closest("tr");
 			document.getElementById("edit_student_id").value =
-				btn.getAttribute("data-student-id") || "";
-			document.getElementById("edit_name").value = row
-				? row.getAttribute("data-name") || ""
-				: "";
-			document.getElementById("edit_year").value = row
-				? row.getAttribute("data-year") || ""
-				: "";
-			document.getElementById("edit_section").value = row
-				? row.getAttribute("data-section") || ""
-				: "";
+				btn.getAttribute("data-student-id") ?? "";
+			document.getElementById("edit_name").value =
+				row?.getAttribute("data-name") ?? "";
+			document.getElementById("edit_year").value =
+				row?.getAttribute("data-year") ?? "";
+			document.getElementById("edit_section").value =
+				row?.getAttribute("data-section") ?? "";
 			modal.removeAttribute("hidden");
 			document.body.style.overflow = "hidden";
 			document.getElementById("edit_name").focus();
-		}
+		};
 
-		function closeModal() {
+		const closeEditModal = () => {
 			modal.setAttribute("hidden", "");
 			document.body.style.overflow = "";
-			var form = document.getElementById("edit-student-form");
-			if (form) {
-				form.reset();
-			}
-		}
+			document.getElementById("edit-student-form")?.reset();
+		};
 
-		function onKeydown(e) {
-			if (e.key === "Escape" && !modal.hasAttribute("hidden")) {
-				closeModal();
+		const onKeydown = (event) => {
+			if (event.key === "Escape" && !modal.hasAttribute("hidden")) {
+				closeEditModal();
 			}
-		}
+		};
 
+		// Wire edit button
 		if (studentList) {
-			studentList.addEventListener("click", function (e) {
-				var btn = e.target.closest(".student-edit-btn");
-				if (!btn || !studentList.contains(btn)) {
-					return;
+			studentList.addEventListener("click", (event) => {
+				const btn = event.target.closest(".student-edit-btn");
+				if (btn?.dataset.studentId && studentList.contains(btn)) {
+					openModal(btn);
 				}
-				openModal(btn);
 			});
 		}
 
-		if (closeBtn) {
-			closeBtn.addEventListener("click", closeModal);
-		}
-		if (backdrop) {
-			backdrop.addEventListener("click", closeModal);
-		}
-
+		// Wire modal controls
+		if (closeBtn) closeBtn.addEventListener("click", closeEditModal);
+		if (backdrop) backdrop.addEventListener("click", closeEditModal);
 		document.addEventListener("keydown", onKeydown);
 
-		var form = document.getElementById("edit-student-form");
+		// Wire form submission
+		const form = document.getElementById("edit-student-form");
 		if (form) {
-			form.addEventListener("submit", function (e) {
-				e.preventDefault();
+			form.addEventListener("submit", (event) => {
+				event.preventDefault();
 
-				var studentId = document.getElementById("edit_student_id").value.trim();
-				var name = document.getElementById("edit_name").value.trim();
-				var year = document.getElementById("edit_year").value.trim();
-				var section = document.getElementById("edit_section").value.trim();
+				const studentId = document.getElementById("edit_student_id").value.trim();
+				const name = document.getElementById("edit_name").value.trim();
+				const year = document.getElementById("edit_year").value.trim();
+				const section = document.getElementById("edit_section").value.trim();
 
 				if (!studentId || !name || !year || !section) {
 					alert("All fields are required.");
@@ -206,49 +172,38 @@ window.TeacherStudentCRUD = (function () {
 					method: "PUT",
 					credentials: "same-origin",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						student_id: studentId,
-						name: name,
-						year: year,
-						section: section,
-					}),
+					body: JSON.stringify({ student_id: studentId, name, year, section }),
 				})
-					.then(function (response) {
-						return response.json().then(function (data) {
+					.then((response) =>
+						response.json().then((data) => {
 							if (!response.ok) {
 								throw new Error(data.error || "Failed to update student");
 							}
 							return data;
-						});
-					})
-					.then(function () {
-						closeModal();
+						}),
+					)
+					.then(() => {
+						closeEditModal();
 						alert("Student updated successfully.");
 						window.TeacherDashboard.reload();
 					})
-					.catch(function (error) {
-						alert("Error: " + error.message);
-					});
+					.catch((error) => alert(`Error: ${error.message}`));
 			});
 		}
-	}
+	};
 
 	// Public API
-	return {
-		init: function () {
-			var toggleBtn = document.getElementById("add-student-toggle");
-			var cancelBtn = document.getElementById("add-student-cancel");
+	return Object.freeze({
+		init: () => {
+			const toggleBtn = document.getElementById("add-student-toggle");
+			const cancelBtn = document.getElementById("add-student-cancel");
 
-			if (toggleBtn) {
-				toggleBtn.addEventListener("click", showAddStudentForm);
-			}
-			if (cancelBtn) {
-				cancelBtn.addEventListener("click", hideAddStudentForm);
-			}
+			if (toggleBtn) toggleBtn.addEventListener("click", showAddStudentForm);
+			if (cancelBtn) cancelBtn.addEventListener("click", hideAddStudentForm);
 
 			initAddStudentForm();
 			initDeleteStudent();
 			initEditStudentModal();
-		}
-	};
+		},
+	});
 })();
