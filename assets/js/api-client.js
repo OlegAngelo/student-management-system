@@ -54,18 +54,6 @@
 		}).then(handleResponse);
 	};
 
-	window.ApiClient.request = function (url, options = {}) {
-		const fetchOptions = {
-			credentials: "same-origin",
-			...options,
-			headers: {
-				"Content-Type": "application/json",
-				...(options.headers || {}),
-			},
-		};
-		return fetch(url, fetchOptions).then(handleResponse);
-	};
-
 	/**
 	 * Handles API errors consistently across the app using native alerts
 	 */
@@ -77,7 +65,6 @@
 		// Behind the scenes debug logging remains intact
 		if (log) console.error("API Error:", error);
 
-		// FIX: Standardized completely on the native browser alert system
 		if (showUI) {
 			alert(message);
 		}
