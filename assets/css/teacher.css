@@ -413,3 +413,117 @@
     background: #f5f5f5;
     border-color: #bbb;
 }
+
+/* Empty state messaging */
+.empty-state {
+    text-align: center;
+    padding: 24px;
+    color: #666;
+    font-size: 15px;
+}
+
+/* Teacher hierarchy components */
+.teacher-card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.teacher-card-header {
+    padding: 12px;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.teacher-card-header:hover {
+    background-color: #efefef;
+}
+
+.teacher-card-content {
+    padding: 16px;
+    border-top: 1px solid #ddd;
+}
+
+.disclosure-triangle {
+    display: inline-block;
+    margin-right: 8px;
+    font-size: 12px;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.subject-count-badge {
+    display: inline-block;
+    margin-left: 12px;
+    background-color: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.subjects-list {
+    margin-bottom: 16px;
+}
+
+.add-subject-btn {
+    margin-bottom: 12px;
+}
+
+/* Teacher management modal row */
+.teacher-modal-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.teacher-modal-row:last-child {
+    border-bottom: none;
+}
+
+.teacher-modal-row__name {
+    flex: 1;
+}
+
+.teacher-modal-row__name strong {
+    font-weight: 600;
+}
+
+.teacher-modal-row__actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.teacher-modal-row__actions button {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+.teacher-modal-row__actions .teacher-delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.teacher-modal-row__actions .teacher-delete-btn:hover {
+    background-color: #c82333;
+}
+
+/* Error messaging */
+.error-message {
+    color: #dc3545;
+    padding: 12px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+}
+
+

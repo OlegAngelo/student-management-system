@@ -183,7 +183,7 @@
 				console.error("QR Code generation error:", e);
 				if (containerEl) {
 					containerEl.innerHTML = `
-						<p style="color: red;">
+						<p class="error-message">
 							Failed to generate QR code: ${e.message}.
 							Kindly contact your administrator.
 						</p>
@@ -529,7 +529,7 @@
 
 		if (!teachers.length) {
 			container.innerHTML =
-				'<div style="text-align: center; padding: 24px; color: #666;"><p>No teachers yet. Click the "+ Add/Manage Teachers" button to add one.</p></div>';
+				'<div class="empty-state"><p>No teachers yet. Click the "+ Add/Manage Teachers" button to add one.</p></div>';
 			return;
 		}
 

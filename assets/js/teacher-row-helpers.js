@@ -77,14 +77,14 @@ function buildSubjectCard(subject) {
 
 function buildSubjectsList(subjects) {
 	if (!subjects || subjects.length === 0) {
-		return '<p style="color: #666;">No subjects for this teacher yet.</p>';
+		return '<p class="empty-state">No subjects for this teacher yet.</p>';
 	}
 	return subjects.map(buildSubjectCard).join("");
 }
 
 function buildAddSubjectForm(teacherId, teacherName) {
 	return `
-		<div class="add-subject-form-container" style="display: none; margin-top: 16px; padding: 16px; border: 1px solid #e0e0e0; border-radius: 4px; background-color: #f9f9f9;">
+		<div class="add-subject-form-container" style="display: none;">
 			<h4 style="margin-top: 0;">Add Subject for ${escapeHtml(teacherName)}</h4>
 			<form class="add-subject-form" data-teacher-id="${teacherId}">
 				<input type="hidden" name="subject_id" value="">
@@ -116,12 +116,12 @@ function buildTeacherCardHeader(teacher, subjectCount) {
 	var subjectLabel = subjectCount !== 1 ? "s" : "";
 
 	return `
-		<div class="teacher-card-header" style="padding: 12px; background-color: #f5f5f5; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+		<div class="teacher-card-header">
 			<div style="display: flex; align-items: center; flex: 1;">
-				<span class="disclosure-triangle" style="display: inline-block; margin-right: 8px; font-size: 12px; transition: transform 0.2s;">▶</span>
+				<span class="disclosure-triangle">▶</span>
 				<strong>${teacherName}</strong>
 				<span style="color: #666; margin-left: 8px;">(${department} Department)</span>
-				<span class="subject-count-badge" style="display: inline-block; margin-left: 12px; background-color: #e0e0e0; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+				<span class="subject-count-badge">
 					${subjectCount} subject${subjectLabel}
 				</span>
 			</div>
@@ -137,11 +137,11 @@ function buildTeacherCard(teacher, subjectsByTeacher) {
 	var header = buildTeacherCardHeader(teacher, subjectCount);
 
 	return `
-		<div class="teacher-card" data-teacher-id="${teacher.id}" style="border: 1px solid #ddd; border-radius: 4px; margin-bottom: 16px; overflow: hidden;">
+		<div class="teacher-card" data-teacher-id="${teacher.id}">
 			${header}
-			<div class="teacher-card-content" style="display: none; padding: 16px; border-top: 1px solid #ddd;">
-				<button type="button" class="add-subject-btn button secondary" data-teacher-id="${teacher.id}" style="margin-bottom: 12px;">+ Add Subject</button>
-				<div class="subjects-list" style="margin-bottom: 16px;">
+			<div class="teacher-card-content" style="display: none;">
+				<button type="button" class="add-subject-btn button secondary" data-teacher-id="${teacher.id}">+ Add Subject</button>
+				<div class="subjects-list">
 					${subjectsList}
 				</div>
 				${addSubjectForm}
@@ -155,13 +155,13 @@ function buildTeacherModalRow(teacher) {
 	var department = escapeHtml(teacher.department);
 
 	return `
-		<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
-			<div>
+		<div class="teacher-modal-row">
+			<div class="teacher-modal-row__name">
 				<strong>${teacherName}</strong> - ${department} Department
 			</div>
-			<div style="display: flex; gap: 4px;">
-				<button type="button" class="teacher-edit-btn" data-teacher-id="${teacher.id}" style="padding: 4px 8px; font-size: 12px;">Edit</button>
-				<button type="button" class="teacher-delete-btn" data-teacher-id="${teacher.id}" style="padding: 4px 8px; font-size: 12px; background-color: #dc3545; color: white;">Delete</button>
+			<div class="teacher-modal-row__actions">
+				<button type="button" class="teacher-edit-btn" data-teacher-id="${teacher.id}">Edit</button>
+				<button type="button" class="teacher-delete-btn" data-teacher-id="${teacher.id}">Delete</button>
 			</div>
 		</div>
 	`;
