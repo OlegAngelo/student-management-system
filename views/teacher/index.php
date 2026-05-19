@@ -222,11 +222,22 @@
         </div>
     </div>
 
+    <!-- Core utilities (required by all modules) -->
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/ui-helpers.js') ?>"></script>
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/api-client.js') ?>"></script>
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-row-helpers.js') ?>"></script>
-    <!-- QR Code Library -->
+
+    <!-- Feature modules (order matters: dependencies first) -->
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-dashboard.js') ?>"></script>
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-student-qr.js') ?>"></script>
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-student-crud.js') ?>"></script>
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-hierarchy.js') ?>"></script>
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-hierarchy-crud.js') ?>"></script>
+
+    <!-- External library for QR code generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Entry point (initializes all modules) -->
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher.js') ?>"></script>
 </body>
 </html>
