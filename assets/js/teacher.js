@@ -182,10 +182,12 @@
 			} catch (e) {
 				console.error("QR Code generation error:", e);
 				if (containerEl) {
-					containerEl.innerHTML =
-						'<p style="color: red;">Failed to generate QR code: ' +
-						e.message +
-						". Kindly contact your administrator.</p>";
+					containerEl.innerHTML = `
+						<p style="color: red;">
+							Failed to generate QR code: ${e.message}.
+							Kindly contact your administrator.
+						</p>
+					`;
 				}
 			}
 		}
@@ -531,10 +533,9 @@
 			return;
 		}
 
-		var svgs = getTeacherSvgs();
 		var html = teachers
 			.map(function (teacher) {
-				return buildTeacherCard(teacher, subjectsByTeacher, svgs.editSvg, svgs.deleteSvg);
+				return buildTeacherCard(teacher, subjectsByTeacher);
 			})
 			.join("");
 
@@ -862,17 +863,7 @@
 
 		var html = teachers
 			.map(function (teacher) {
-				return (
-					'<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;"><div><strong>' +
-					escapeHtml(teacher.name) +
-					"</strong> - " +
-					escapeHtml(teacher.department) +
-					' Department</div><div style="display: flex; gap: 4px;"><button type="button" class="teacher-edit-btn" data-teacher-id="' +
-					teacher.id +
-					'" style="padding: 4px 8px; font-size: 12px;">Edit</button><button type="button" class="teacher-delete-btn" data-teacher-id="' +
-					teacher.id +
-					'" style="padding: 4px 8px; font-size: 12px; background-color: #dc3545; color: white;">Delete</button></div></div>'
-				);
+				return buildTeacherModalRow(teacher);
 			})
 			.join("");
 
