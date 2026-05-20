@@ -27,8 +27,8 @@
         public function all(): array
         {
             $sql = 'SELECT id, student_id, name, year, section, date_created
-                    FROM students
-                    ORDER BY id DESC';
+                        FROM students
+                        ORDER BY date_created DESC, id DESC';
             $result = $this->conn->query($sql);
             if ($result === false) {
                 return [];

@@ -11,7 +11,8 @@
     <main class="shell"
         data-students-api="<?= htmlspecialchars($baseUrl . '/teacher/api/students', ENT_QUOTES, 'UTF-8') ?>"
         data-subjects-api="<?= htmlspecialchars($baseUrl . '/teacher/api/subjects', ENT_QUOTES, 'UTF-8') ?>"
-        data-teachers-api="<?= htmlspecialchars($baseUrl . '/teacher/api/teachers', ENT_QUOTES, 'UTF-8') ?>">
+        data-teachers-api="<?= htmlspecialchars($baseUrl . '/teacher/api/teachers', ENT_QUOTES, 'UTF-8') ?>"
+        data-teachers-hierarchy-api="<?= htmlspecialchars($baseUrl . '/teacher/api/teachers-hierarchy', ENT_QUOTES, 'UTF-8') ?>">
         <h1 class="page-title">Teacher Dashboard</h1>
 
         <!-- student & subject container -->
@@ -68,12 +69,11 @@
                     <div class="student-list-toolbar__sort">
                         <label for="student-list-sort">Sort by</label>
                         <select id="student-list-sort" class="student-list-toolbar__select">
+                            <option value="created-desc" selected>Recently added</option>
                             <option value="name-asc">Name (A–Z)</option>
                             <option value="name-desc">Name (Z–A)</option>
                             <option value="id-asc">Student ID (ascending)</option>
                             <option value="id-desc">Student ID (descending)</option>
-                            <option value="year-asc">Year (oldest first)</option>
-                            <option value="year-desc">Year (newest first)</option>
                             <option value="section-asc">Section (A–Z)</option>
                             <option value="section-desc">Section (Z–A)</option>
                         </select>
@@ -105,7 +105,7 @@
             <section class="card">
                 <div class="card-header">
                     <h2>Teacher and Schedule List</h2>
-                    <button type="button" id="open-teacher-modal-btn" class="button primary"> + Add/Manage Teachers</button>
+                    <button type="button" id="open-teacher-modal-btn" class="button primary"> + Add or Edit Teacher</button>
                 </div>
 
                 <!-- teachers list container (hierarchical: teachers with nested subjects) -->
@@ -222,9 +222,22 @@
         </div>
     </div>
 
+    <!-- Core utilities (required by all modules) -->
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/ui-helpers.js') ?>"></script>
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/api-client.js') ?>"></script>
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-row-helpers.js') ?>"></script>
-    <!-- QR Code Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
+
+    <!-- Feature modules (order matters: dependencies first) -->
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-dashboard.js') ?>"></script>
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-student-qr.js') ?>"></script>
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-student-crud.js') ?>"></script>
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-hierarchy.js') ?>"></script>
+    <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher-hierarchy-crud.js') ?>"></script>
+
+    <!-- External library for QR code generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- Entry point (initializes all modules) -->
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/teacher.js') ?>"></script>
 </body>
 </html>
