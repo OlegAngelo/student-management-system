@@ -56,9 +56,18 @@ function buildSubjectCard(subject) {
 	var scheduleDisplay = subject.schedule_time.substring(0, 5);
 	var lateAfterDisplay = subject.late_after_time.substring(0, 5);
 	var subjectName = escapeHtml(subject.subject_name);
+	var subjectSearch = escapeHtml(
+		[
+			subject.subject_name || "",
+			subject.schedule_time || "",
+			subject.late_after_time || "",
+		]
+			.join(" ")
+			.trim(),
+	);
 
 	return `
-		<div class="subject-schedule-card" data-subject-id="${subject.id}">
+		<div class="subject-schedule-card" data-subject-id="${subject.id}" data-subject-search="${subjectSearch}">
 			<div class="subject-schedule-card__top">
 				<h3 class="subject-schedule-card__title">${subjectName}</h3>
 				<div class="subject-schedule-card__actions">
@@ -71,8 +80,8 @@ function buildSubjectCard(subject) {
 				</div>
 			</div>
 			<div class="subject-schedule-card__meta">
-				<span>Schedule: ${scheduleDisplay}</span>
-				<span>Late after: ${lateAfterDisplay}</span>
+				<span class="subject-meta">Schedule: ${scheduleDisplay}</span>
+				<span class="subject-meta">Late after: ${lateAfterDisplay}</span>
 			</div>
 		</div>
 	`;
@@ -122,8 +131,8 @@ function buildTeacherCardHeader(teacher, subjectCount) {
 		<div class="teacher-card-header">
 			<div style="display: flex; align-items: center; flex: 1;">
 				<span class="disclosure-triangle">▶</span>
-				<strong>${teacherName}</strong>
-				<span style="color: #666; margin-left: 8px;">(${department} Department)</span>
+				<strong class="teacher-name">${teacherName}</strong>
+				<span class="teacher-department" style="color: #666; margin-left: 8px;">(${department} Department)</span>
 				<span class="subject-count-badge">
 					${subjectCount} subject${subjectLabel}
 				</span>
@@ -138,9 +147,23 @@ function buildTeacherCard(teacher, subjectsByTeacher) {
 	var subjectsList = buildSubjectsList(teacherSubjects);
 	var addSubjectForm = buildAddSubjectForm(teacher.id, teacher.name);
 	var header = buildTeacherCardHeader(teacher, subjectCount);
+	var teacherSearch = escapeHtml(
+		[teacher.name || "", teacher.department || ""]
+			.concat(
+				teacherSubjects.map(function (subject) {
+					return [
+						subject.subject_name || "",
+						subject.schedule_time || "",
+						subject.late_after_time || "",
+					].join(" ");
+				}),
+			)
+			.join(" ")
+			.trim(),
+	);
 
 	return `
-		<div class="teacher-card" data-teacher-id="${teacher.id}">
+		<div class="teacher-card" data-teacher-id="${teacher.id}" data-teacher-search="${teacherSearch}">
 			${header}
 			<div class="teacher-card-content" style="display: none;">
 				<button type="button" class="add-subject-btn button secondary" data-teacher-id="${teacher.id}">+ Add Subject</button>

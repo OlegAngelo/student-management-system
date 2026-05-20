@@ -28,7 +28,24 @@
     border-radius: 10px;
 }
 
+.teacher-list-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 14px 20px;
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: #f6f8fb;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
 .student-list-toolbar__search {
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+.teacher-list-toolbar__search {
     flex: 1 1 200px;
     min-width: 0;
 }
@@ -42,6 +59,23 @@
     font-weight: 400;
     background: #fff;
     margin-bottom: 0;
+}
+
+.teacher-list-toolbar__input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 400;
+    background: #fff;
+    margin-bottom: 0;
+}
+
+.search-highlight {
+    background: #ffef88;
+    border-radius: 3px;
+    padding: 0 1px;
 }
 
 .student-list-toolbar__sort {
