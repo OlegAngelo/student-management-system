@@ -10,7 +10,7 @@
     <main class="shell">
         <section class="card">
             <h1 class="page-title">Page not found</h1>
-            <p class="page-intro">Requested page does not exist.</p>
+            <p class="page-intro">The page you are looking for does not exist.</p>
             <p class="page-actions"><a class="button primary" href="<?= htmlspecialchars($baseUrl . '/') ?>">Go home</a></p>
         </section>
     </main>
