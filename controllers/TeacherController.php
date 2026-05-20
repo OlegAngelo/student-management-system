@@ -30,6 +30,7 @@
                         'name' => (string) ($row['name'] ?? ''),
                         'year' => (string) ($row['year'] ?? ''),
                         'section' => (string) ($row['section'] ?? ''),
+                        'date_created' => (string) ($row['date_created'] ?? ''),
                     ];
                 },
                 $rows

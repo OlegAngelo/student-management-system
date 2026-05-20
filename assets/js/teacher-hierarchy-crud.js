@@ -6,7 +6,15 @@
 window.TeacherHierarchyCRUD = (function () {
 	"use strict";
 
+	var subjectActionsBound = false;
+	var subjectFormHandlersBound = false;
+
 	function attachSubjectActions() {
+		if (subjectActionsBound) {
+			return;
+		}
+		subjectActionsBound = true;
+
 		document.addEventListener("click", function (e) {
 			if (e.target.closest(".subject-edit-btn")) {
 				var btn = e.target.closest(".subject-edit-btn");
@@ -46,9 +54,11 @@ window.TeacherHierarchyCRUD = (function () {
 
 				if (subject) {
 					window.TeacherHierarchy.attachSubjectToTeacher(subject.teacher_id);
+
 					var form = document.querySelector(
 						'.add-subject-form[data-teacher-id="' + subject.teacher_id + '"]',
 					);
+
 					if (form) {
 						form.querySelector('input[name="subject_id"]').value = subject.id;
 						form.querySelector('input[name="subject_name"]').value =
@@ -91,6 +101,11 @@ window.TeacherHierarchyCRUD = (function () {
 	}
 
 	function attachSubjectFormHandlers() {
+		if (subjectFormHandlersBound) {
+			return;
+		}
+		subjectFormHandlersBound = true;
+
 		var shell = document.querySelector("main.shell[data-subjects-api]");
 		if (!shell) {
 			return;
@@ -101,24 +116,27 @@ window.TeacherHierarchyCRUD = (function () {
 			return;
 		}
 
-		document.querySelectorAll(".add-subject-form").forEach(function (form) {
-			form.removeEventListener("submit", handleSubjectFormSubmit);
-			form.addEventListener("submit", function (e) {
-				handleSubjectFormSubmit(e, subjectsApi, form);
-			});
+		document.addEventListener("submit", function (e) {
+			var form = e.target.closest(".add-subject-form");
+			if (!form) {
+				return;
+			}
+			handleSubjectFormSubmit(e, subjectsApi, form);
 		});
 
-		document.querySelectorAll(".cancel-add-subject").forEach(function (btn) {
-			btn.addEventListener("click", function (e) {
-				e.preventDefault();
-				var form = btn.closest(".add-subject-form");
-				if (form) {
-					var teacherId =
-						form.getAttribute("data-teacher-id") ||
-						form.querySelector('input[name="current_teacher_id"]').value;
-					window.TeacherHierarchy.hideSubjectForm(teacherId);
-				}
-			});
+		document.addEventListener("click", function (e) {
+			var btn = e.target.closest(".cancel-add-subject");
+			if (!btn) {
+				return;
+			}
+			e.preventDefault();
+			var form = btn.closest(".add-subject-form");
+			if (form) {
+				var teacherId =
+					form.getAttribute("data-teacher-id") ||
+					form.querySelector('input[name="current_teacher_id"]').value;
+				window.TeacherHierarchy.hideSubjectForm(teacherId);
+			}
 		});
 	}
 
@@ -217,15 +235,18 @@ window.TeacherHierarchyCRUD = (function () {
 		container.innerHTML = html;
 	}
 
-	function openTeacherModal() {
+	function resetTeacherForm() {
 		document.getElementById("teacher_edit_id").value = "";
 		document.getElementById("teacher_edit_name").value = "";
 		document.getElementById("teacher_edit_department").value = "";
+		document.getElementById("teacher-form-submit").textContent = "Add Teacher";
+	}
+
+	function openTeacherModal() {
 		window.UIHelpers.openModal(
 			"teacher-modal",
 			document.getElementById("teacher_edit_name"),
 		);
-		document.getElementById("teacher-form-submit").textContent = "Add Teacher";
 	}
 
 	function closeTeacherModal() {
@@ -265,9 +286,19 @@ window.TeacherHierarchyCRUD = (function () {
 			});
 	}
 
-	function deleteTeacher(teacherId, teachersApi) {
+	function deleteTeacher(teacherId, teachersApi, subjectCount) {
 		window.ApiClient.delete(teachersApi, { id: parseInt(teacherId) })
 			.then(function () {
+				if (subjectCount > 0) {
+					alert(
+						"Teacher deleted. " +
+							subjectCount +
+							" subject" +
+							(subjectCount !== 1 ? "s" : "") +
+							" removed as well.",
+					);
+					return;
+				}
 				alert("Teacher deleted successfully.");
 				loadTeachers();
 			})
@@ -281,6 +312,7 @@ window.TeacherHierarchyCRUD = (function () {
 		var form = document.getElementById("teacher-form");
 		var closeBtn = document.getElementById("teacher-modal-close");
 		var backdrop = document.getElementById("teacher-modal-backdrop");
+		var openBtn = document.getElementById("open-teacher-modal-btn");
 
 		var shell = document.querySelector("main.shell[data-teachers-api]");
 		if (!shell) {
@@ -294,6 +326,13 @@ window.TeacherHierarchyCRUD = (function () {
 
 		if (closeBtn) {
 			closeBtn.addEventListener("click", closeTeacherModal);
+		}
+
+		if (openBtn) {
+			openBtn.addEventListener("click", function () {
+				resetTeacherForm();
+				openTeacherModal();
+			});
 		}
 
 		if (backdrop) {
@@ -358,8 +397,18 @@ window.TeacherHierarchyCRUD = (function () {
 			if (e.target.closest(".teacher-delete-btn")) {
 				var btn = e.target.closest(".teacher-delete-btn");
 				var tid = btn.getAttribute("data-teacher-id");
-				if (tid && confirm("Delete this teacher? This cannot be undone.")) {
-					deleteTeacher(tid, teachersApi);
+				var subjectCount =
+					parseInt(btn.getAttribute("data-subject-count"), 10) || 0;
+				var message =
+					subjectCount > 0
+						? "This teacher has " +
+							subjectCount +
+							" subject" +
+							(subjectCount !== 1 ? "s" : "") +
+							" assigned. Deleting will remove them too. Continue?"
+						: "Delete this teacher? This cannot be undone.";
+				if (tid && confirm(message)) {
+					deleteTeacher(tid, teachersApi, subjectCount);
 				}
 			}
 		});

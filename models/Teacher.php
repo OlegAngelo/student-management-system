@@ -36,29 +36,6 @@
         }
 
         /**
-         * Gets one teacher row by id.
-         *
-         * @param int $id
-         * @return array<string, mixed>|null
-         */
-        public function findById(int $id): ?array
-        {
-            $sql = 'SELECT id, name, department FROM teachers WHERE id = ? LIMIT 1';
-            $stmt = $this->conn->prepare($sql);
-            if ($stmt === false) {
-                return null;
-            }
-
-            $stmt->bind_param('i', $id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $row = $result->fetch_assoc();
-            $stmt->close();
-
-            return $row !== null ? $row : null;
-        }
-
-        /**
          * Inserts a new teacher row.
          *
          * @param string $name

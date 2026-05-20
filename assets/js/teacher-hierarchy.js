@@ -8,6 +8,8 @@
 window.TeacherHierarchy = (() => {
 	"use strict";
 
+	const expandedTeacherIds = new Set();
+
 	/**
 	 * Render teacher cards with hierarchy
 	 * @param {Array} teachers - Teacher list
@@ -28,6 +30,16 @@ window.TeacherHierarchy = (() => {
 			.join("");
 
 		container.innerHTML = html;
+
+		container.querySelectorAll(".teacher-card").forEach((card) => {
+			const teacherId = card.getAttribute("data-teacher-id");
+			if (teacherId && expandedTeacherIds.has(teacherId)) {
+				const content = card.querySelector(".teacher-card-content");
+				const triangle = card.querySelector(".disclosure-triangle");
+				if (content) content.style.display = "block";
+				if (triangle) triangle.style.transform = "rotate(90deg)";
+			}
+		});
 
 		document.querySelectorAll(".teacher-card-header").forEach((header) => {
 			header.addEventListener("click", () => {
@@ -56,6 +68,7 @@ window.TeacherHierarchy = (() => {
 		const header = cardElement.querySelector(".teacher-card-header");
 		const content = cardElement.querySelector(".teacher-card-content");
 		const triangle = cardElement.querySelector(".disclosure-triangle");
+		const teacherId = cardElement.getAttribute("data-teacher-id");
 
 		if (!header || !content) return;
 
@@ -64,9 +77,11 @@ window.TeacherHierarchy = (() => {
 		if (isExpanded) {
 			content.style.display = "none";
 			if (triangle) triangle.style.transform = "rotate(0deg)";
+			if (teacherId) expandedTeacherIds.delete(teacherId);
 		} else {
 			content.style.display = "block";
 			if (triangle) triangle.style.transform = "rotate(90deg)";
+			if (teacherId) expandedTeacherIds.add(teacherId);
 		}
 	};
 
@@ -76,7 +91,9 @@ window.TeacherHierarchy = (() => {
 	 * @returns {void}
 	 */
 	const attachSubjectToTeacher = (teacherId) => {
-		const card = document.querySelector(`.teacher-card[data-teacher-id="${teacherId}"]`);
+		const card = document.querySelector(
+			`.teacher-card[data-teacher-id="${teacherId}"]`,
+		);
 		if (!card) return;
 
 		const formContainer = card.querySelector(".add-subject-form-container");
@@ -97,7 +114,9 @@ window.TeacherHierarchy = (() => {
 	 * @returns {void}
 	 */
 	const hideSubjectFormForTeacher = (teacherId) => {
-		const card = document.querySelector(`.teacher-card[data-teacher-id="${teacherId}"]`);
+		const card = document.querySelector(
+			`.teacher-card[data-teacher-id="${teacherId}"]`,
+		);
 		if (!card) return;
 
 		const formContainer = card.querySelector(".add-subject-form-container");
@@ -120,6 +139,20 @@ window.TeacherHierarchy = (() => {
 			"main.shell[data-teachers-api][data-subjects-api]",
 		);
 		if (!shell) return;
+
+		const hierarchyApi = shell.getAttribute("data-teachers-hierarchy-api");
+		if (hierarchyApi) {
+			window.ApiClient.get(hierarchyApi)
+				.then((data) => {
+					const teachers = data?.teachers ?? [];
+					const subjectsByTeacher = data?.subjectsByTeacher ?? {};
+					renderTeachersList(teachers, subjectsByTeacher);
+				})
+				.catch(() => {
+					renderTeachersList([], {});
+				});
+			return;
+		}
 
 		const teachersApi = shell.getAttribute("data-teachers-api");
 		const subjectsApi = shell.getAttribute("data-subjects-api");
@@ -161,6 +194,9 @@ window.TeacherHierarchy = (() => {
 		},
 		hideSubjectForm: (teacherId) => {
 			hideSubjectFormForTeacher(teacherId);
+		},
+		attachSubjectToTeacher: (teacherId) => {
+			attachSubjectToTeacher(teacherId);
 		},
 	});
 })();

@@ -1,8 +1,10 @@
 // SVG icons (shared across components)
 var ICONS = {
-	edit: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
-	delete: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
-	qr: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>'
+	edit:
+		'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+	delete:
+		'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
+	qr: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg>',
 };
 
 function escapeHtml(value) {
@@ -35,9 +37,10 @@ function buildStudentRow(row) {
 	var name = escapeHtml(row.name || "");
 	var year = escapeHtml(row.year || "");
 	var section = escapeHtml(row.section || "");
+	var created = escapeHtml(row.date_created || "");
 
 	return `
-		<tr data-student-id="${sid}" data-name="${name}" data-year="${year}" data-section="${section}">
+		<tr data-student-id="${sid}" data-name="${name}" data-year="${year}" data-section="${section}" data-created="${created}">
 			<td>${sid}</td>
 			<td>${name}</td>
 			<td>${year}</td>
@@ -153,6 +156,7 @@ function buildTeacherCard(teacher, subjectsByTeacher) {
 function buildTeacherModalRow(teacher) {
 	var teacherName = escapeHtml(teacher.name);
 	var department = escapeHtml(teacher.department);
+	var subjectCount = parseInt(teacher.subject_count, 10) || 0;
 
 	return `
 		<div class="teacher-modal-row">
@@ -160,8 +164,12 @@ function buildTeacherModalRow(teacher) {
 				<strong>${teacherName}</strong> - ${department} Department
 			</div>
 			<div class="teacher-modal-row__actions">
-				<button type="button" class="teacher-edit-btn" data-teacher-id="${teacher.id}">Edit</button>
-				<button type="button" class="teacher-delete-btn" data-teacher-id="${teacher.id}">Delete</button>
+				<button type="button" class="subject-icon-btn teacher-edit-btn" data-teacher-id="${teacher.id}" aria-label="Edit ${teacherName}">
+					${ICONS.edit}
+				</button>
+				<button type="button" class="subject-icon-btn teacher-delete-btn" data-teacher-id="${teacher.id}" data-subject-count="${subjectCount}" aria-label="Delete ${teacherName}">
+					${ICONS.delete}
+				</button>
 			</div>
 		</div>
 	`;

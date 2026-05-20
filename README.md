@@ -544,7 +544,6 @@ Simple MVC-style layout: one entry point, a single route file, controllers, mode
 - **api-client.js** - Centralized API client for all HTTP requests
   - HTTP methods: `get()`, `post()`, `put()`, `delete()`, `request()`
   - Error handling: `handleError()` with user-friendly messages
-  - Validation: `validateRequired()` for client-side field validation
   - Consistent response parsing and error status handling
 
 - **teacher.js** - Teacher dashboard logic (refactored to use helpers above)

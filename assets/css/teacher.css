@@ -71,10 +71,13 @@
 
 #student-list {
     margin-top: 16px;
-    overflow-x: auto;
     border: 1px solid #ddd;
     border-radius: 10px;
     background: #fff;
+    
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 500px; /* scroll height */
 }
 
 .student-list-table {
@@ -83,13 +86,17 @@
     font-size: 14px;
 }
 
-.student-list-table thead th {
+ .student-list-table thead th {
     background: #d9d9d9;
     color: #222;
     text-align: left;
     font-weight: 600;
     padding: 12px 14px;
     border-bottom: 1px solid #ccc;
+
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .student-list-table tbody td {
@@ -264,6 +271,18 @@
 }
 
 .subject-icon-btn.student-delete-btn:hover {
+    background: #b71c1c;
+    border-color: #8e1111;
+    color: #fff;
+}
+
+.subject-icon-btn.subject-delete-btn {
+    background: #d32f2f;
+    border-color: #b71c1c;
+    color: #fff;
+}
+
+.subject-icon-btn.subject-delete-btn:hover {
     background: #b71c1c;
     border-color: #8e1111;
     color: #fff;
@@ -469,6 +488,15 @@
 
 .subjects-list {
     margin-bottom: 16px;
+
+    /* limits the height of the block list and forces vertical scrolling */
+    max-height: 500px;   /* scroll height */
+    overflow-y: auto;    
+    overflow-x: hidden;  
+    
+    /*for smooth scrolling */
+    padding-right: 6px; 
+    scroll-behavior: smooth;
 }
 
 .add-subject-btn {
@@ -476,6 +504,16 @@
 }
 
 /* Teacher management modal row */
+#teachers-list-container {
+    /* limits the height of the teacher stack and enables vertical scrolling */
+    max-height: 600px;   /* scroll height - match to student list */
+    overflow-y: auto;
+    overflow-x: hidden; 
+    
+    padding-right: 8px; 
+    margin-top: 12px;
+}
+
 .teacher-modal-row {
     display: flex;
     justify-content: space-between;

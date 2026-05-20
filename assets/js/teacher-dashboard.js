@@ -8,9 +8,6 @@
 window.TeacherDashboard = (() => {
 	"use strict";
 
-	// State
-	let studentList = [];
-
 	/**
 	 * Render student rows in table
 	 * @param {Array} rows - Student data rows
@@ -28,7 +25,6 @@ window.TeacherDashboard = (() => {
 			return;
 		}
 
-		studentList = rows;
 		const html = rows.map(buildStudentRow).join("");
 		tbody.innerHTML = html;
 	};
@@ -97,6 +93,9 @@ window.TeacherDashboard = (() => {
 		};
 
 		const sortValue = (row, key) => {
+			if (key === "created") {
+				return row.getAttribute("data-created") ?? "";
+			}
 			if (key === "id") {
 				return row.getAttribute("data-student-id") ?? "";
 			}
@@ -111,7 +110,11 @@ window.TeacherDashboard = (() => {
 			const vb = sortValue(b, key);
 
 			let n;
-			if (key === "year") {
+			if (key === "created") {
+				const ta = Date.parse(va);
+				const tb = Date.parse(vb);
+				n = (isNaN(ta) ? 0 : ta) - (isNaN(tb) ? 0 : tb);
+			} else if (key === "year") {
 				n = (parseInt(va, 10) || 0) - (parseInt(vb, 10) || 0);
 			} else if (key === "id") {
 				n = va.localeCompare(vb, undefined, { numeric: true, sensitivity: "base" });
@@ -123,7 +126,7 @@ window.TeacherDashboard = (() => {
 		};
 
 		const applySort = () => {
-			const mode = sortEl.value || "name-asc";
+			const mode = sortEl.value || "created-desc";
 			const rows = getDataRows();
 
 			rows.sort((a, b) => compareRows(mode, a, b));
@@ -143,8 +146,6 @@ window.TeacherDashboard = (() => {
 			initToolbar();
 			loadStudentsFromApi();
 		},
-		render: (rows) => renderStudentRows(rows),
 		reload: () => loadStudentsFromApi(),
-		getStudents: () => [...studentList],
 	});
 })();

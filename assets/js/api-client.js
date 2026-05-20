@@ -71,16 +71,4 @@
 
 		return message;
 	};
-
-	window.ApiClient.validateRequired = function (data, requiredFields) {
-		for (const field of requiredFields) {
-			if (
-				!data[field] ||
-				(typeof data[field] === "string" && !data[field].trim())
-			) {
-				return field.charAt(0).toUpperCase() + field.slice(1) + " is required";
-			}
-		}
-		return null;
-	};
 })();
