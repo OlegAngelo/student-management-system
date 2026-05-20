@@ -108,6 +108,14 @@
                     <button type="button" id="open-teacher-modal-btn" class="button primary"> + Add or Edit Teacher</button>
                 </div>
 
+                <div class="teacher-list-toolbar">
+                    <div class="teacher-list-toolbar__search">
+                        <label for="teacher-list-search" class="visually-hidden">Search teachers or subjects</label>
+                        <input type="search" id="teacher-list-search" class="teacher-list-toolbar__input"
+                            placeholder="Search teachers, departments, or subjects" autocomplete="off">
+                    </div>
+                </div>
+
                 <!-- teachers list container (hierarchical: teachers with nested subjects) -->
                 <div id="teachers-list-container" class="teachers-list" role="list">
                     <div style="text-align: center; padding: 24px; color: #666;">

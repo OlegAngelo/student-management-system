@@ -9,6 +9,61 @@ window.TeacherHierarchy = (() => {
 	"use strict";
 
 	const expandedTeacherIds = new Set();
+	let currentSearchQuery = "";
+
+	const normalize = (value) => (value || "").toLowerCase();
+
+	const ensureOriginalText = (el) => {
+		if (!el) return "";
+		if (!el.dataset.originalText) {
+			el.dataset.originalText = el.textContent || "";
+		}
+		return el.dataset.originalText;
+	};
+
+	const applyHighlightToElement = (el, query) => {
+		if (!el) return;
+		const text = ensureOriginalText(el);
+		if (!query) {
+			el.textContent = text;
+			return;
+		}
+		const hay = text.toLowerCase();
+		const needle = query.toLowerCase();
+		let index = hay.indexOf(needle);
+		if (index === -1) {
+			el.textContent = text;
+			return;
+		}
+
+		el.textContent = "";
+		let lastIndex = 0;
+		while (index !== -1) {
+			if (index > lastIndex) {
+				el.appendChild(document.createTextNode(text.slice(lastIndex, index)));
+			}
+			const mark = document.createElement("span");
+			mark.className = "search-highlight";
+			mark.textContent = text.slice(index, index + needle.length);
+			el.appendChild(mark);
+			lastIndex = index + needle.length;
+			index = hay.indexOf(needle, lastIndex);
+		}
+		if (lastIndex < text.length) {
+			el.appendChild(document.createTextNode(text.slice(lastIndex)));
+		}
+	};
+
+	const setCardExpandedState = (card, expanded) => {
+		const content = card.querySelector(".teacher-card-content");
+		const triangle = card.querySelector(".disclosure-triangle");
+		if (content) {
+			content.style.display = expanded ? "block" : "none";
+		}
+		if (triangle) {
+			triangle.style.transform = expanded ? "rotate(90deg)" : "rotate(0deg)";
+		}
+	};
 
 	/**
 	 * Render teacher cards with hierarchy
@@ -31,13 +86,18 @@ window.TeacherHierarchy = (() => {
 
 		container.innerHTML = html;
 
+		if (!container.querySelector(".teachers-list-empty")) {
+			const empty = document.createElement("div");
+			empty.className = "empty-state teachers-list-empty";
+			empty.style.display = "none";
+			empty.innerHTML = "<p>No teachers or subjects match your search.</p>";
+			container.appendChild(empty);
+		}
+
 		container.querySelectorAll(".teacher-card").forEach((card) => {
 			const teacherId = card.getAttribute("data-teacher-id");
 			if (teacherId && expandedTeacherIds.has(teacherId)) {
-				const content = card.querySelector(".teacher-card-content");
-				const triangle = card.querySelector(".disclosure-triangle");
-				if (content) content.style.display = "block";
-				if (triangle) triangle.style.transform = "rotate(90deg)";
+				setCardExpandedState(card, true);
 			}
 		});
 
@@ -57,6 +117,8 @@ window.TeacherHierarchy = (() => {
 
 		window.TeacherHierarchyCRUD.attachSubjectActions();
 		window.TeacherHierarchyCRUD.attachSubjectFormHandlers();
+
+		applySearchFilter();
 	};
 
 	/**
@@ -75,13 +137,68 @@ window.TeacherHierarchy = (() => {
 		const isExpanded = content.style.display !== "none";
 
 		if (isExpanded) {
-			content.style.display = "none";
-			if (triangle) triangle.style.transform = "rotate(0deg)";
+			setCardExpandedState(cardElement, false);
 			if (teacherId) expandedTeacherIds.delete(teacherId);
 		} else {
-			content.style.display = "block";
-			if (triangle) triangle.style.transform = "rotate(90deg)";
+			setCardExpandedState(cardElement, true);
 			if (teacherId) expandedTeacherIds.add(teacherId);
+		}
+	};
+
+	const applySearchFilter = () => {
+		const container = document.getElementById("teachers-list-container");
+		const input = document.getElementById("teacher-list-search");
+		if (!container || !input) return;
+
+		const query = normalize(input.value).trim();
+		currentSearchQuery = query;
+
+		const cards = [...container.querySelectorAll(".teacher-card")];
+		let visibleCount = 0;
+
+		cards.forEach((card) => {
+			const teacherSearch = normalize(card.getAttribute("data-teacher-search"));
+			const subjectCards = [...card.querySelectorAll(".subject-schedule-card")];
+			const teacherMatch = query && teacherSearch.includes(query);
+			let subjectMatchCount = 0;
+
+			subjectCards.forEach((subjectCard) => {
+				const subjectSearch = normalize(
+					subjectCard.getAttribute("data-subject-search"),
+				);
+				const subjectMatch = query && subjectSearch.includes(query);
+				if (!query || teacherMatch) {
+					subjectCard.style.display = "";
+				} else {
+					subjectCard.style.display = subjectMatch ? "" : "none";
+				}
+				if (subjectMatch) {
+					subjectMatchCount += 1;
+				}
+			});
+
+			const showCard = !query || teacherMatch || subjectMatchCount > 0;
+			card.style.display = showCard ? "" : "none";
+
+			if (showCard) {
+				visibleCount += 1;
+				applyHighlightToElement(card.querySelector(".teacher-name"), query);
+				applyHighlightToElement(card.querySelector(".teacher-department"), query);
+				card
+					.querySelectorAll(".subject-schedule-card__title, .subject-meta")
+					.forEach((el) => applyHighlightToElement(el, query));
+				if (query) {
+					setCardExpandedState(card, true);
+				} else {
+					const teacherId = card.getAttribute("data-teacher-id");
+					setCardExpandedState(card, teacherId && expandedTeacherIds.has(teacherId));
+				}
+			}
+		});
+
+		const emptyState = container.querySelector(".teachers-list-empty");
+		if (emptyState) {
+			emptyState.style.display = query && visibleCount === 0 ? "block" : "none";
 		}
 	};
 
@@ -147,6 +264,7 @@ window.TeacherHierarchy = (() => {
 					const teachers = data?.teachers ?? [];
 					const subjectsByTeacher = data?.subjectsByTeacher ?? {};
 					renderTeachersList(teachers, subjectsByTeacher);
+					applySearchFilter();
 				})
 				.catch(() => {
 					renderTeachersList([], {});
@@ -178,15 +296,28 @@ window.TeacherHierarchy = (() => {
 				});
 
 				renderTeachersList(teachers, subjectsByTeacher);
+				applySearchFilter();
 			})
 			.catch(() => {
 				renderTeachersList([], {});
 			});
 	};
 
+	const initSearch = () => {
+		const input = document.getElementById("teacher-list-search");
+		if (!input) return;
+
+		input.addEventListener("input", applySearchFilter);
+		if (currentSearchQuery) {
+			input.value = currentSearchQuery;
+		}
+		applySearchFilter();
+	};
+
 	// Public API
 	return Object.freeze({
 		init: () => {
+			initSearch();
 			loadTeachersWithSubjects();
 		},
 		reload: () => {
