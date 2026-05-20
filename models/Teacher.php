@@ -24,7 +24,7 @@
          */
         public function all(): array
         {
-            $sql = 'SELECT id, name, subject FROM teachers ORDER BY id DESC';
+            $sql = 'SELECT id, name, department FROM teachers ORDER BY id DESC';
             $result = $this->conn->query($sql);
             if ($result === false) {
                 return [];
@@ -36,44 +36,21 @@
         }
 
         /**
-         * Gets one teacher row by id.
-         *
-         * @param int $id
-         * @return array<string, mixed>|null
-         */
-        public function findById(int $id): ?array
-        {
-            $sql = 'SELECT id, name, subject FROM teachers WHERE id = ? LIMIT 1';
-            $stmt = $this->conn->prepare($sql);
-            if ($stmt === false) {
-                return null;
-            }
-
-            $stmt->bind_param('i', $id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $row = $result->fetch_assoc();
-            $stmt->close();
-
-            return $row !== null ? $row : null;
-        }
-
-        /**
          * Inserts a new teacher row.
          *
          * @param string $name
-         * @param string $subject
+         * @param string $department
          * @return bool
          */
-        public function create(string $name, string $subject): bool
+        public function create(string $name, string $department): bool
         {
-            $sql = 'INSERT INTO teachers (name, subject) VALUES (?, ?)';
+            $sql = 'INSERT INTO teachers (name, department) VALUES (?, ?)';
             $stmt = $this->conn->prepare($sql);
             if ($stmt === false) {
                 return false;
             }
 
-            $stmt->bind_param('ss', $name, $subject);
+            $stmt->bind_param('ss', $name, $department);
             $ok = $stmt->execute();
             $stmt->close();
 
@@ -81,22 +58,22 @@
         }
 
         /**
-         * Updates teacher name and subject by id.
+         * Updates teacher name and department by id.
          *
          * @param int $id
          * @param string $name
-         * @param string $subject
+         * @param string $department
          * @return bool
          */
-        public function updateById(int $id, string $name, string $subject): bool
+        public function updateById(int $id, string $name, string $department): bool
         {
-            $sql = 'UPDATE teachers SET name = ?, subject = ? WHERE id = ?';
+            $sql = 'UPDATE teachers SET name = ?, department = ? WHERE id = ?';
             $stmt = $this->conn->prepare($sql);
             if ($stmt === false) {
                 return false;
             }
 
-            $stmt->bind_param('ssi', $name, $subject, $id);
+            $stmt->bind_param('ssi', $name, $department, $id);
             $ok = $stmt->execute();
             $stmt->close();
 
