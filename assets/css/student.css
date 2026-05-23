@@ -98,3 +98,122 @@
 .qr-attendance-scanner[hidden] {
     display: none !important;
 }
+
+.manual-attendance-panel {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #dbe3ee;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow:
+        0 2px 6px rgba(15, 23, 42, 0.04),
+        0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.manual-attendance-panel__header {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.manual-attendance-panel h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.manual-attendance-panel__subtitle {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.manual-attendance-panel__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #e8f1ff;
+    color: #0b57d0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.manual-attendance-message {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.manual-attendance-message--info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+}
+
+.manual-attendance-message--success {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #047857;
+}
+
+.manual-attendance-message--error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+}
+
+.manual-attendance-form {
+    display: grid;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.manual-attendance-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.manual-attendance-form__field input {
+    width: 100%;
+    margin-bottom: 0;
+    padding: 12px 14px;
+    border: 1px solid #d6dde8;
+    border-radius: 12px;
+    background: #fff;
+    font-size: 16px;
+}
+
+.manual-attendance-form__field input:disabled,
+.manual-attendance-form__actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.manual-attendance-form__actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+    .manual-attendance-panel {
+        padding: 16px;
+    }
+
+    .manual-attendance-form__actions {
+        justify-content: stretch;
+    }
+
+    .manual-attendance-form__actions .button {
+        width: 100%;
+    }
+}

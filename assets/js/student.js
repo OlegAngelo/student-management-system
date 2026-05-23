@@ -155,12 +155,16 @@
         var select = document.getElementById('subject_id');
         var placeholder = document.getElementById('attendance-placeholder');
         var scanner = document.getElementById('attendance-scanner');
+        var manualSubjectId = document.getElementById('manual-subject-id');
+        var manualStudentInput = document.getElementById('manual-student-id');
+        var manualSubmit = document.getElementById('manual-attendance-submit');
         if (!select || !placeholder || !scanner) {
             return;
         }
 
         // Toggles placeholder vs scanner visibility from the subject select value.
         function update() {
+            var hasSubject = !!select.value;
             if (select.value) {
                 placeholder.setAttribute('hidden', '');
                 scanner.removeAttribute('hidden');
@@ -168,14 +172,135 @@
                 scanner.setAttribute('hidden', '');
                 placeholder.removeAttribute('hidden');
             }
+
+            if (manualSubjectId) {
+                manualSubjectId.value = select.value || '';
+            }
+
+            if (manualStudentInput) {
+                manualStudentInput.disabled = !hasSubject;
+            }
+
+            if (manualSubmit) {
+                manualSubmit.disabled = !hasSubject;
+            }
         }
 
         select.addEventListener('change', update);
         update();
     }
 
+    function initManualAttendanceForm() {
+        var form = document.getElementById('manual-attendance-form');
+        var input = document.getElementById('manual-student-id');
+        var subjectIdInput = document.getElementById('manual-subject-id');
+        var messageEl = document.getElementById('manual-attendance-message');
+        var submitBtn = document.getElementById('manual-attendance-submit');
+        var select = document.getElementById('subject_id');
+        if (!form || !input || !subjectIdInput || !messageEl || !submitBtn || !select) {
+            return;
+        }
+
+        function setMessage(text, type) {
+            if (!text) {
+                messageEl.textContent = '';
+                messageEl.className = 'manual-attendance-message';
+                messageEl.setAttribute('hidden', '');
+                return;
+            }
+
+            messageEl.textContent = text;
+            messageEl.className = 'manual-attendance-message manual-attendance-message--' + type;
+            messageEl.removeAttribute('hidden');
+        }
+
+        function syncSubject() {
+            subjectIdInput.value = select.value || '';
+            input.disabled = !select.value;
+            submitBtn.disabled = !select.value;
+            if (!select.value) {
+                setMessage('Select a subject above to enable manual attendance.', 'info');
+            } else if (messageEl.textContent && messageEl.classList.contains('manual-attendance-message--info')) {
+                setMessage('', 'info');
+            }
+        }
+
+        function isValidStudentId(value) {
+            return /^\d+$/.test(value);
+        }
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            var studentId = (input.value || '').trim();
+            var subjectId = (subjectIdInput.value || '').trim();
+
+            if (!subjectId) {
+                setMessage('Select a subject above before recording attendance.', 'error');
+                return;
+            }
+
+            if (!studentId) {
+                setMessage('Student ID is required.', 'error');
+                input.focus();
+                return;
+            }
+
+            if (!isValidStudentId(studentId)) {
+                setMessage('Student ID must contain digits only.', 'error');
+                input.focus();
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Recording…';
+            setMessage('', 'info');
+
+            fetch(form.action, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    student_id: studentId,
+                    subject_id: parseInt(subjectId, 10)
+                })
+            })
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        return {
+                            ok: response.ok,
+                            data: data || {}
+                        };
+                    });
+                })
+                .then(function (result) {
+                    if (!result.ok) {
+                        throw new Error(result.data.error || result.data.message || 'Unable to record attendance.');
+                    }
+
+                    setMessage(result.data.message || 'Attendance recorded successfully.', 'success');
+                    input.value = '';
+                    input.focus();
+                })
+                .catch(function (error) {
+                    setMessage(error.message || 'Unable to record attendance. Please try again.', 'error');
+                })
+                .finally(function () {
+                    submitBtn.textContent = 'Record Attendance';
+                    submitBtn.disabled = !select.value;
+                });
+        });
+
+        select.addEventListener('change', syncSubject);
+        syncSubject();
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         initStudentSubjectPickerFilter();
         initAttendanceScanner();
+        initManualAttendanceForm();
     });
 })();

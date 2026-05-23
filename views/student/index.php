@@ -66,6 +66,42 @@
                     <p>Please align your QR code to the camera</p>
                 </div>
             </section>
+
+            <section class="manual-attendance-panel" aria-labelledby="manual-attendance-title">
+                <div class="manual-attendance-panel__header">
+                    <div>
+                        <h2 id="manual-attendance-title">Manual Attendance</h2>
+                        <p id="manual-attendance-help" class="manual-attendance-panel__subtitle">
+                            Select a subject above, then enter only your Student ID to record attendance.
+                        </p>
+                    </div>
+                    <span class="manual-attendance-panel__badge">Alternative option</span>
+                </div>
+
+                <div id="manual-attendance-message" class="manual-attendance-message" role="status" aria-live="polite" hidden></div>
+
+                <form id="manual-attendance-form" class="manual-attendance-form" method="post" action="<?= htmlspecialchars($baseUrl . '/student/attendance') ?>" novalidate>
+                    <input type="hidden" id="manual-subject-id" name="subject_id" value="">
+
+                    <div class="manual-attendance-form__field">
+                        <label for="manual-student-id">Student ID</label>
+                        <input
+                            type="text"
+                            id="manual-student-id"
+                            name="student_id"
+                            placeholder="Enter your Student ID"
+                            autocomplete="off"
+                            inputmode="numeric"
+                            pattern="[0-9]+"
+                            aria-describedby="manual-attendance-help manual-attendance-message"
+                            required>
+                    </div>
+
+                    <div class="manual-attendance-form__actions">
+                        <button type="submit" id="manual-attendance-submit" class="button primary" disabled>Record Attendance</button>
+                    </div>
+                </form>
+            </section>
         </section>
     </main>
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/student.js') ?>"></script>

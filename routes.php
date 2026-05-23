@@ -41,5 +41,6 @@
 
         // API routes for CRUD operations on subjects (for student dashboard)
         '/student/subjects' => [StudentController::class, 'subjectsJson'],
+        'POST:/student/attendance' => [StudentController::class, 'recordAttendance'],
     ];
 ?>
