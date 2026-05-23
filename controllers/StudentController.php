@@ -43,5 +43,89 @@
 
             echo json_encode(['subjects' => $subjects], JSON_UNESCAPED_UNICODE);
         }
+
+        /**
+         * Records a manual attendance entry for the selected subject.
+         * POST /student/attendance
+         */
+        public function recordAttendance(string $baseUrl): void
+        {
+            header('Content-Type: application/json; charset=utf-8');
+
+            $rawInput = file_get_contents('php://input');
+            $input = [];
+            if (is_string($rawInput) && $rawInput !== '') {
+                $decoded = json_decode($rawInput, true);
+                if (is_array($decoded)) {
+                    $input = $decoded;
+                }
+            }
+            if ($input === []) {
+                $input = $_POST;
+            }
+
+            $studentId = trim((string) ($input['student_id'] ?? ''));
+            $subjectIdRaw = $input['subject_id'] ?? '';
+
+            if ($studentId === '') {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Student ID is required.'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            if (!preg_match('/^\d+$/', $studentId)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Student ID must contain digits only.'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            if (!is_numeric($subjectIdRaw) || (int) $subjectIdRaw <= 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Please select a subject before recording attendance.'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $subjectId = (int) $subjectIdRaw;
+
+            $studentModel = new Student();
+            $student = $studentModel->findByStudentId($studentId);
+            if ($student === null) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'Student ID not found.'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $subjectModel = new Subject();
+            $subject = $subjectModel->findById($subjectId);
+            if ($subject === null) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'Selected subject was not found.'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            $date = date('Y-m-d');
+            $currentTime = date('H:i:s');
+            $lateAfterTime = trim((string) ($subject['late_after_time'] ?? ''));
+            $status = $lateAfterTime !== '' && $currentTime > $lateAfterTime ? 'late' : 'present';
+
+            $attendanceModel = new Attendance();
+            $existing = $attendanceModel->findByKey($studentId, $subjectId, $date);
+            if ($existing !== null) {
+                http_response_code(409);
+                echo json_encode(['success' => false, 'error' => 'Attendance already recorded for this subject today.'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            if (!$attendanceModel->create($studentId, $subjectId, $date, $currentTime, $status)) {
+                http_response_code(500);
+                echo json_encode(['success' => false, 'error' => 'Unable to save attendance right now. Please try again.'], JSON_UNESCAPED_UNICODE);
+                return;
+            }
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Attendance recorded successfully.',
+            ], JSON_UNESCAPED_UNICODE);
+        }
     }
 ?>
