@@ -55,55 +55,69 @@
                 </div>
             </form>
 
-            <div id="attendance-placeholder" class="qr-attendance-area qr-attendance-area--empty">
-                <p><?= $hasSubjects
-                    ? 'Please select a subject to start scanning'
-                    : 'No subjects available yet. Ask your teacher to add one.' ?></p>
+            <div class="attendance-workspace">
+                <div id="attendance-placeholder" class="qr-attendance-area qr-attendance-area--empty attendance-workspace__placeholder">
+                    <p><?= $hasSubjects
+                        ? 'Please select a subject to start scanning'
+                        : 'No subjects available yet. Ask your teacher to add one.' ?></p>
+                </div>
+
+                <section class="manual-attendance-panel" aria-labelledby="manual-attendance-title">
+                    <div class="manual-attendance-panel__header">
+                        <div>
+                            <h2 id="manual-attendance-title">Manual Attendance</h2>
+                            <p id="manual-attendance-help" class="manual-attendance-panel__subtitle">
+                                Select a subject above, then enter only your Student ID to record attendance.
+                            </p>
+                        </div>
+                        <span class="manual-attendance-panel__badge">Alternative option</span>
+                    </div>
+
+                    <div id="manual-attendance-message" class="manual-attendance-message" role="status" aria-live="polite" hidden></div>
+
+                    <form id="manual-attendance-form" class="manual-attendance-form" method="post" action="<?= htmlspecialchars($baseUrl . '/student/attendance') ?>" novalidate>
+                        <input type="hidden" id="manual-subject-id" name="subject_id" value="">
+
+                        <div class="manual-attendance-form__field">
+                            <label for="manual-student-id">Student ID</label>
+                            <input
+                                type="text"
+                                id="manual-student-id"
+                                name="student_id"
+                                placeholder="Enter your Student ID"
+                                autocomplete="off"
+                                inputmode="numeric"
+                                pattern="[0-9]+"
+                                aria-describedby="manual-attendance-help manual-attendance-message"
+                                required>
+                        </div>
+
+                        <div class="manual-attendance-form__actions">
+                            <button type="submit" id="manual-attendance-submit" class="button primary" disabled>Record Attendance</button>
+                        </div>
+                    </form>
+                </section>
             </div>
 
             <section id="attendance-scanner" class="qr-attendance-scanner" hidden>
                 <div class="qr-attendance-area qr-attendance-area--scanner">
-                    <p>Please align your QR code to the camera</p>
-                </div>
-            </section>
-
-            <section class="manual-attendance-panel" aria-labelledby="manual-attendance-title">
-                <div class="manual-attendance-panel__header">
-                    <div>
-                        <h2 id="manual-attendance-title">Manual Attendance</h2>
-                        <p id="manual-attendance-help" class="manual-attendance-panel__subtitle">
-                            Select a subject above, then enter only your Student ID to record attendance.
+                    <div class="qr-attendance-scanner__frame">
+                        <video id="attendance-video" class="qr-attendance-scanner__video" autoplay playsinline muted></video>
+                        <div class="qr-attendance-scanner__overlay" aria-hidden="true"></div>
+                    </div>
+                    <div class="qr-attendance-scanner__status-row">
+                        <p id="attendance-scanner-message" class="qr-attendance-scanner__message" role="status" aria-live="polite">
+                            Camera scanner is loading…
                         </p>
+                        <button type="button" id="attendance-scanner-restart" class="button secondary qr-attendance-scanner__restart" hidden>
+                            Restart scanner
+                        </button>
                     </div>
-                    <span class="manual-attendance-panel__badge">Alternative option</span>
                 </div>
-
-                <div id="manual-attendance-message" class="manual-attendance-message" role="status" aria-live="polite" hidden></div>
-
-                <form id="manual-attendance-form" class="manual-attendance-form" method="post" action="<?= htmlspecialchars($baseUrl . '/student/attendance') ?>" novalidate>
-                    <input type="hidden" id="manual-subject-id" name="subject_id" value="">
-
-                    <div class="manual-attendance-form__field">
-                        <label for="manual-student-id">Student ID</label>
-                        <input
-                            type="text"
-                            id="manual-student-id"
-                            name="student_id"
-                            placeholder="Enter your Student ID"
-                            autocomplete="off"
-                            inputmode="numeric"
-                            pattern="[0-9]+"
-                            aria-describedby="manual-attendance-help manual-attendance-message"
-                            required>
-                    </div>
-
-                    <div class="manual-attendance-form__actions">
-                        <button type="submit" id="manual-attendance-submit" class="button primary" disabled>Record Attendance</button>
-                    </div>
-                </form>
             </section>
         </section>
     </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
     <script src="<?= htmlspecialchars($baseUrl . '/assets/js/student.js') ?>"></script>
 </body>
 </html>
