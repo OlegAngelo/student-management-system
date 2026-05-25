@@ -38,10 +38,6 @@
 		});
 	}
 
-	function getQrDecoder() {
-		return window.jsQR || null;
-	}
-
 	// Lazy-loads subject options from the API when teacher or filter changes.
 	function initStudentSubjectPickerFilter() {
 		var root = document.getElementById("student-subject-picker");
@@ -283,7 +279,7 @@
 				return;
 			}
 
-			if (!getQrDecoder()) {
+			if (!window.jsQR) {
 				setScannerMessage(
 					"QR scanner library failed to load. Use manual attendance instead.",
 					"error",
@@ -366,7 +362,7 @@
 								return;
 							}
 
-							var qrResult = getQrDecoder()(
+							var qrResult = window.jsQR(
 								imageData.data,
 								imageData.width,
 								imageData.height,
