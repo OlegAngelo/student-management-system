@@ -43,6 +43,7 @@ Attendance is recorded with date and time, and each student is limited to **one 
 - Send `student_id` + `subject_id` to backend attendance endpoint
 - Automatically save attendance date and time for selected subject
 - Display success or error message after scan
+- Uses `jsQR` as a canvas-based fallback decoder when native browser APIs are unavailable (CDN by default; local vendor recommended).
 
 ---
 
@@ -73,8 +74,10 @@ The system follows a simple two-route structure:
    - `assets/css/base.css` for layout, cards, buttons, and home tiles
    - `assets/css/teacher.css` for the teacher dashboard (lists, subject cards, QR modal)
    - `assets/css/student.css` for the student portal (subject picker, QR attendance areas)
-   - `assets/js/teacher.js` for the teacher dashboard (student list, subjects list, QR modal)
-   - `assets/js/student.js` for the student portal (subject picker, attendance UI)
+
+- `assets/js/teacher.js` for the teacher dashboard (student list, subjects list, QR modal)
+- `assets/js/student.js` for the student portal (subject picker, attendance UI)
+- Note: `assets/js/student.js` now includes the camera QR scanner logic and uses `jsQR` as a canvas-based fallback when native browser decoding is unavailable.
 
 ---
 
@@ -407,6 +410,8 @@ Response format (JSON):
    - `http://localhost/student-management-system/student`
 
 > Note: routing uses Apache rewrite rules via `.htaccess`. Ensure Apache has `mod_rewrite` enabled and `AllowOverride All` for the project directory (XAMPP default usually works).
+
+> Browser camera: The student page uses the browser camera for QR scanning. Allow camera permission in the browser. The scanner uses `jsQR` as a canvas-based fallback (included via CDN by default). For offline or locked-down environments, place a local copy at `assets/js/vendor/jsQR.min.js` and update the script reference in `views/student/index.php`.
 
 ---
 
